@@ -15,53 +15,78 @@ document.addEventListener('DOMContentLoaded', () => {
     let uploadedFiles = [];
     let isWaitingForResponse = false; // New variable to track if we're waiting for a response
     let fullChatHistory = []; // 保存每一次的对话记录
-    let history = []; // 初始化 history
+    let countHistory = -10; // 保存每一次的对话记录
 
-    const model_list = {
-        "Openai": {"gpt-4o-mini": "gpt-4o-mini", "gpt-4o": "gpt-4o"},
-        "Google": {"Gemini 1.5 Pro": "gemini-1.5-pro", "Gemini 1.5 Flash": "gemini-1.5-flash", "Gemini 1.0 Pro": "gemini-1.0-pro"},
-        "Groq": {
-            "LLaMA3 8b": "llama3-8b-8192",
-            "LLaMA3 70b": "llama3-70b-8192",
-            "LLaMa3 Groq 8b Tool Use": "llama3-groq-8b-8192-tool-use-preview",
-            "LLaMA3 Groq 70b Tool Use": "llama3-groq-70b-8192-tool-use-preview",
-            "Mixtral 8x7b": "mixtral-8x7b-32768",
-            "Gemma 7b": "gemma-7b-it",
-            "Gemma2 9b": "gemma2-9b-it"
-        }
+    window.onload = () => {
+        console.log("Window loaded");
+        initializeModelSelection();
     };
-    function populateModelTypes() {
+    
+    async function fetchModelList() {
+        console.log("Fetching model list...");
+        try {
+            const response = await fetch('/model_list');
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+            const data = await response.json();
+            console.log("Fetched model list:", data);
+            return data;
+        } catch (error) {
+            console.error('Error fetching model list:', error);
+            return null;
+        }
+    }
+    
+    // Function to populate model types select element
+    function populateModelTypes(modelSelect, modelList) {
         modelSelect.innerHTML = '';
-        for (const key in model_list) {
+        modelList.forEach(item => {
             const option = document.createElement('option');
-            option.value = key;
-            option.textContent = key;
+            option.value = item.category;
+            option.textContent = item.category;
             modelSelect.appendChild(option);
-        }
+        });
     }
-
-    function populateModelNames(modelType) {
+    
+    // Function to populate model names select element
+    function populateModelNames(modelNameSelect, modelList, modelType) {
         modelNameSelect.innerHTML = '';
-        const models = model_list[modelType];
-        for (const [name, value] of Object.entries(models)) {
-            const option = document.createElement('option');
-            option.value = value;
-            option.textContent = name;
-            modelNameSelect.appendChild(option);
+        const selectedCategory = modelList.find(item => item.category === modelType);
+        if (selectedCategory) {
+            selectedCategory.models.forEach(model => {
+                const option = document.createElement('option');
+                option.value = model.value;
+                option.textContent = model.name;
+                modelNameSelect.appendChild(option);
+            });
         }
     }
-
-    modelSelect.addEventListener('change', () => {
-        populateModelNames(modelSelect.value);
-    });
-
-    populateModelTypes();
-    populateModelNames(modelSelect.value);
-    modelSelect.addEventListener('change', () => {
-        populateModelNames(modelSelect.value);
-    });
-
-    populateModelNames(modelSelect.value);
+    
+    // Main function to initialize the model selection
+    async function initializeModelSelection() {
+        console.log("initializeModelSelection function called");
+        const modelSelect = document.getElementById('modelSelect');
+        const modelNameSelect = document.getElementById('modelNameSelect');
+    
+        if (!modelSelect || !modelNameSelect) {
+            console.error("Couldn't find modelSelect or modelNameSelect elements");
+            return;
+        }
+    
+        const modelList = await fetchModelList();
+        if (!modelList) {
+            console.error('Failed to fetch model list');
+            return;
+        }
+    
+        populateModelTypes(modelSelect, modelList);
+        populateModelNames(modelNameSelect, modelList, modelSelect.value);
+    
+        modelSelect.addEventListener('change', () => {
+            populateModelNames(modelNameSelect, modelList, modelSelect.value);
+        });
+    }
 
 
     if (typeof hljs === 'undefined') {
@@ -126,7 +151,10 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.append('model_type', modelSelect.value);
         formData.append('model_name', modelNameSelect.value);
         formData.append('api_key', apiKeyInput.value);
-        formData.append('history', JSON.stringify(history)); // 添加 history
+
+        // 提取最近countHistory次对话记录（2个字典代表一次對話）
+        const recentHistory = fullChatHistory.slice(countHistory);
+        formData.append('history', JSON.stringify(recentHistory));
 
         // Process files
         for (const file of uploadedFiles) {
@@ -186,18 +214,10 @@ document.addEventListener('DOMContentLoaded', () => {
             // After full message is received, display with buttons
             displayBotMessage(botMessage, botMessageDiv, true);
 
-            // 更新 fullChatHistory 和 history
-            if (!isRetry) {
-                fullChatHistory.push({ role: 'user', content: message });
-                fullChatHistory.push({ role: 'assistant', content: botMessage });
+            // 更新 fullChatHistory
+            fullChatHistory.push({ role: 'user', content: message });
+            fullChatHistory.push({ role: 'assistant', content: botMessage });
 
-                // 保持 history 只包含最近5次對話
-                if (fullChatHistory.length > 10) {
-                    history = fullChatHistory.slice(-10);
-                } else {
-                    history = [...fullChatHistory];
-                }
-            }
 
         } catch (error) {
             console.error('Error:', error);
@@ -454,15 +474,9 @@ document.addEventListener('DOMContentLoaded', () => {
             // 找到這個消息在 fullChatHistory 的索引
             const userIndex = fullChatHistory.findIndex(item => item.content === userMessageText && item.role === 'user');
             if (userIndex !== -1) {
-                // 刪除該索引之後的所有訊息
-                fullChatHistory = fullChatHistory.slice(0, userIndex + 1);
-
-                // 更新 history
-                if (fullChatHistory.length > 10) {
-                    history = fullChatHistory.slice(-10);
-                } else {
-                    history = [...fullChatHistory];
-                }}
+                // 刪除該索引(含該索引消息)之後的所有訊息
+                fullChatHistory = fullChatHistory.slice(0, userIndex);
+            }
 
             // Call sendMessage function to resend the user message and update the same message box
             sendMessage(userMessageText, botMessageDiv, retryButton, true);
@@ -561,6 +575,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     modelSelect.addEventListener('change', () => {
+        // 清空 API key
+        apiKeyInput.value = '';
+        
         // Handle model change (you can add your logic here)
         console.log('Selected model:', modelSelect.value);
     });
