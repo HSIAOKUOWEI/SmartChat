@@ -1,13 +1,11 @@
-default ={ "default_user":{"id": "123",
-                           "username": "admin",
+default ={ "default_user":{"username": "admin",
                            "password": "password"}
                            }
 
 
 
 class User:
-    def __init__(self, user_id,user_name, ):
-        self.id = user_id
+    def __init__(self, user_name, ):
         self.name = user_name
 
     @staticmethod
@@ -15,5 +13,6 @@ class User:
         # 簡單的預設賬密
         if username == default["default_user"]["username"] and password == default["default_user"]["password"]:
 
-            return User(user_id = default["default_user"]["id"], user_name=default["default_user"]["username"])
-        return None
+            return {"success":True, "user_name": username}
+        else:
+            return {"success":False, "user_name": username}

@@ -1,41 +1,103 @@
+from .generater_keys import load_private_key,load_public_key
+
 import jwt
-import datetime
-from .redis_server_setting import *
+from datetime import datetime, timedelta, timezone
+from .redis_server_setting import redis_client
 
-SECRET_KEY = '123'  # 请使用更安全的密钥
-algorithm = 'HS256'
+algorithm = 'RS256'
+private_key = load_private_key()
+public_key = load_public_key()
+def generate_token(user_id):
+    # 過期時間
+    token_expiration_hours = 1
 
+    # jwt由三個部分组成，以"."分割成三部分，分别是：header、payload和signature
+    headers = {
+        'typ': 'JWT',  # 类型，固定为JWT
+        'alg': algorithm  # 算法，如：RS256、HS256等
+    }
 
-
-def generate_token(user_id, username):
     payload = {
         'user_id': user_id,
-        'username': username,
-        'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=1)  # token有效期为1小时
+        'exp': datetime.now(timezone.utc) + timedelta(hours=token_expiration_hours), #過期時間
+        'iat': datetime.now(timezone.utc) #生成時間
     }
+
     # 生成token
-    token = jwt.encode(payload, SECRET_KEY, algorithm=algorithm)
+    token = jwt.encode(headers=headers, payload=payload,
+                       key=private_key, algorithm=algorithm
+                       )
+    
+    # redis保存token並設置過期時間
+    redis_client.set(user_id, token, ex=token_expiration_hours * 3600)  # 3600秒 = 1小时
 
-    # 存储token到Redis并设置过期时间
-    redis_client.set(token, user_id, ex=3600)  # 3600秒 = 1小时
-
-    return token
-
+    return {"success":True, "token":token}
+def delete_token(token):
+    try:
+        payload = jwt.decode(token, public_key, algorithms=[algorithm], options={"verify_exp": False})
+        redis_client.delete(payload["user_id"])
+        return {"success":True, "message": "Token deleted"}
+    except jwt.InvalidTokenError:
+        return {"success":False, "message": "Token delete failed"}
+    
 def verify_token(token):
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[algorithm])
-        user_id = payload['user_id']
+        # 先取出解密後數據
+        payload = jwt.decode(token, public_key, algorithms=[algorithm])
 
-        # 从Redis中查找token
-        if redis_client.exists(token):
-            print("Token found in Redis")
-            return user_id, payload
+        # 檢查 Redis 中是否存在該 token
+        redis_token = redis_client.get(payload['user_id'])
+
+        # 檢查 token 是否有效
+        if redis_token == token:
+            return {"success":True , "token": token}
         else:
-            print("Token not found in Redis or expired")
-            return None, None  # token在Redis中不存在或已过期
+            return {"success":False , "message": "Token does not exist"}
+
     except jwt.ExpiredSignatureError:
-        print("Token has expired")
-        return None, None  # token过期
+        # token已過期
+        return {"success":False, "message": "Token expired"}
     except jwt.InvalidTokenError:
-        print("Invalid token")
-        return None, None  # 无效的toke
+        # 無效的token
+        return {"success":False, "message": "Invalid token"}
+
+# 延長token過期時間
+def refresh_token_expiry(token, 
+                         token_renewal_threshold_minutes=10,
+                         extension_hours=1):
+    try:
+        # 解码JWT令牌
+        payload = jwt.decode(token, public_key, algorithms=[algorithm], options={"verify_exp": False})
+       
+        # 将JWT令牌中的过期时间转换为datetime对象
+        exp_time = datetime.fromtimestamp(payload['exp'], timezone.utc)
+       
+        # 如果当前时间与过期时间之差小于指定的阈值（以分钟为单位）
+        if exp_time - datetime.now(timezone.utc) < timedelta(minutes=token_renewal_threshold_minutes):
+            # 计算新的过期时间
+            new_exp = datetime.now(timezone.utc) + timedelta(hours=extension_hours)
+            
+            # 更新payload中的过期时间
+            payload['exp'] = int(new_exp.timestamp())
+
+            # 使用私钥重新编码JWT令牌
+            new_token = jwt.encode(payload, private_key, algorithm=algorithm)
+
+            # 将新的JWT令牌存储到Redis中，并设置过期时间
+            redis_client.set(payload["user_id"], new_token, ex=(new_exp - datetime.now(timezone.utc)).seconds)
+            return new_token # 返回新的JWT令牌
+    
+     # 如果解码JWT令牌时发生异常（例如，令牌无效）
+    except jwt.InvalidTokenError:
+        return None
+    # 如果没有触发异常但也没有满足更新条件，则返回None
+    return None
+if __name__ == '__main__':
+    token = generate_token("2342342432")
+    print(token)
+    payload = verify_token(token["token"])
+    print(payload)
+
+    print(redis_client.keys("*"))
+    delete_token(payload["token"])
+    print(redis_client.keys("*"))

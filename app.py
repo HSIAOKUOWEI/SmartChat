@@ -1,7 +1,7 @@
 from flask import Flask, redirect, url_for, request
-from controllers.login import auth_bp
+from controllers.auth import auth_bp
 # from controllers.chatbot import chatbot_bp
-from controllers.chat import chatbot_bp
+from controllers.agent_chat import agentChat_bp
 import time
 
 from models.jwt_utils import verify_token
@@ -18,7 +18,7 @@ def create_app():
 
     # 注册蓝图
     app.register_blueprint(auth_bp)
-    app.register_blueprint(chatbot_bp)
+    app.register_blueprint(agentChat_bp)
     # app.register_blueprint(chatbot_bpp)
     
     # 添加缓存清除过滤器

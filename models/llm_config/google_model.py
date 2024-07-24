@@ -1,6 +1,5 @@
 from langchain_google_genai import ChatGoogleGenerativeAI
 
-
 def google_llm(model_name="gemini-1.5-pro", google_api_key=None, temperature=0.7):
     # gemini-1.5-pro , gemini-1.5-flash, gemini-1.0-pro
     google_llm = ChatGoogleGenerativeAI(google_api_key=google_api_key,

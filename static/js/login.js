@@ -1,5 +1,4 @@
 $(document).ready(function() {
-
     // 調用彈窗
     function loadModal(message) {
         // 檢查彈窗是否存在
@@ -63,7 +62,7 @@ $(document).ready(function() {
                 if (response.success) {
                     // 存储token到cookie
                     document.cookie = "token=" + response.token + "; path=/";
-                    window.location.href = '/chat';
+                    window.location.href = '/agent_chat';
                 } else {
                     $('#message').text(response.message).show();
                     loadModal(response.message);
@@ -71,10 +70,13 @@ $(document).ready(function() {
                         $('#message').fadeOut();
                     }, 3000); // 显示3秒后隐藏
                 }
+                // Clear username and password fields
+                $('#username').val('');
+                $('#password').val('');
             },
             error: function(xhr) {
                 $('#message').text(xhr.responseJSON.message).show();
-                let Message = xhr.responseJSON.message + " ,Invalid username or password, the correct account password has been automatically filled in for you";
+                let Message = xhr.responseJSON.message + " , the correct account password has been automatically filled in for you";
                 loadModal(Message);
                 setTimeout(function() {
                     $('#message').fadeOut();
