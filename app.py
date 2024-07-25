@@ -1,7 +1,7 @@
 from flask import Flask, request, redirect, url_for, jsonify
 from controllers.auth import auth_bp
 from controllers.agent_chat import agentChat_bp
-from controllers.model_list import modelList_bp
+from controllers.get_model_list import modelList_bp
 import time
 from models.jwt_utils import verify_token, refresh_token_expiry
 
