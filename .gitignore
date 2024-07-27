@@ -1,5 +1,5 @@
 .env
 private_key.pem
 public_key.pem
-mongodb_data/
-redis_data/do
+mongodb_db/
+redis_db/
