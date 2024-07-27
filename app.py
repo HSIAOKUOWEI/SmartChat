@@ -1,10 +1,10 @@
 from flask import Flask, request, redirect, url_for, jsonify
-from controllers.auth import auth_bp
-from controllers.agent_chat import agentChat_bp
-from controllers.get_model_list import modelList_bp
-from controllers.users import user_bp
+from .controllers.auth import auth_bp
+from .controllers.agent_chat import agentChat_bp
+from .controllers.get_model_list import modelList_bp
+from .controllers.users import user_bp
 import time
-from models.until.jwt_utils import verify_token, refresh_token_expiry
+from .models.until.jwt_utils import verify_token, refresh_token_expiry
 
 def cache_bust(url):
     """Filter to append a timestamp to static file URLs to prevent caching."""
@@ -32,7 +32,7 @@ def create_app():
         # 排除不需要验证和更新的endpoint
         if request.endpoint in ['auth.login', 'auth.generate_token', 'user.register','user.forgot_password', 'static']:
             return
-
+        print(123)
         # 从请求中获取 'token' 的 cookie 值
         token = request.cookies.get('token')
         # 验证 token
@@ -55,4 +55,4 @@ def create_app():
 
 if __name__ == '__main__':
     app = create_app()
-    app.run(debug=True)
+    app.run(host="0.0.0.0",port=5000,debug=True)

@@ -1,7 +1,7 @@
 import re
 from pymongo import errors
 from bson import ObjectId
-from models.until.mongodb_server import get_mongodb_db
+from .until.mongodb_server import get_mongodb_db
 
 # 连接MongoDB
 db = get_mongodb_db(db_name='mydatabase')

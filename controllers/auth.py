@@ -1,8 +1,8 @@
 from flask import Blueprint, jsonify, request, render_template, redirect, url_for
 import requests
 
-from models.until.jwt_utils import generate_token, verify_token, delete_token
-from models.users import validate_credentials
+from ..models.until.jwt_utils import generate_token, verify_token, delete_token
+from ..models.users import validate_credentials
 
 auth_bp = Blueprint('auth', __name__)
 

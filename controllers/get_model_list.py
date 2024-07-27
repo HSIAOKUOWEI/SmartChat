@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify
-from models.llm_config.model_list import MODEL_LIST_DETAILS
+from ..models.llm_config.model_list import MODEL_LIST_DETAILS
 
 modelList_bp = Blueprint('model_list', __name__)
 @modelList_bp.route('/model_list', methods=['GET'])

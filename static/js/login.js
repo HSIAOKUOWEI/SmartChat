@@ -14,7 +14,7 @@ $(document).ready(function() {
             $('#myModal').removeClass('hidden');
         }
     }
-
+    // console.log('login.js loaded');
     function bindModalEvents() {
         $('#closeModal').on('click', function() {
             $('#myModal').addClass('hidden');

@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, Response
-from models.llm_config.model_list import get_model
+from ..models.llm_config.model_list import get_model
 import json
-from models.agent_chat import agent_executor
+from ..models.agent_chat import agent_executor
 
 agentChat_bp = Blueprint('agent_chat', __name__)
 

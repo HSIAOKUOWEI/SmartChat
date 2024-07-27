@@ -45,9 +45,13 @@ def verify_token(token):
         payload = jwt.decode(token, public_key, algorithms=[algorithm])
 
         # 檢查 Redis 中是否存在該 token
-        redis_token = redis_client.get(payload['user_id']).decode()
-        # print("redis_token ",redis_token )
-        # print("token", token)
+        redis_token = redis_client.get(payload['user_id'])
+        
+        if redis_token is None:
+            return {"success": False, "message": "Token does not exist in Redis"}
+
+        # Decode Redis token and compare
+        redis_token = redis_token.decode()
         # 檢查 token 是否有效
         if redis_token == token:
             print("成功")
