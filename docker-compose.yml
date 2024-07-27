@@ -1,0 +1,40 @@
+version: '3.8'
+
+# 定義服務
+services:
+  mongodb: #定義一個mongodb的服務
+    image: mongo:latest # 拉取指定版本的mongo的image
+    container_name: mongodb # 設定容器名稱
+    restart: always #配置容器在任何情况下都重新启动，包括容器退出时
+    ports:
+      - "27017:27017" #主機端口:容器端口
+    # environment: # 添加賬密
+    #   - MONGO_INITDB_ROOT_USERNAME=admin
+    #   - MONGO_INITDB_ROOT_PASSWORD=password123
+    volumes:
+      - mongodb_data:/data/db #引用定義好的卷名:容器中目錄 <也可直接用資料夾路徑：/data/db>
+
+  redis:
+    image: redis:latest
+    container_name: redis 
+    restart: always 
+    ports: 
+      - "6379:6379" #
+    volumes:
+      - redis_data:/data 
+
+# 定義持久化數據的卷
+volumes:
+  mongodb_data: # 定義名為mongodb_data的卷，讓service中的volumese通過此卷名引用，此方法可更細緻控制卷，并且可在多個服務間共享卷
+    driver: local # 指定卷的驅動為local，表示卷儲存在本地文件系統中
+    driver_opts: # 用於指定volume的驅動設置
+      o: bind # 表示綁定掛載，也就是將主機的指定資料夾掛載到容器中
+      type: none # 表示沒有特定類型
+      device: D:\LLM_application\mongdb # 表示該卷綁定的主機資料夾目錄
+
+  redis_data:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: D:\LLM_application\redis

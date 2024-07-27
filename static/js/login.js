@@ -23,13 +23,6 @@ $(document).ready(function() {
         });
     }
 
-    // 點擊這兩個按鈕跳出彈窗
-    $('#forgotPassword, #createAccount').on('click', function(e) {
-        e.preventDefault();
-        loadModal('Username: admin<br>Password: password');
-    });
-
-
     // 是否顯示密碼
     $('#togglePassword').on('click', function() {
         const passwordField = $('#password');

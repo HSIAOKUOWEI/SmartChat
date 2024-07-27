@@ -1,16 +1,14 @@
-from .generater_keys import load_private_key,load_public_key
-
+from .generater_keys import get_keys
+from ..config import algorithm
 import jwt
 from datetime import datetime, timedelta, timezone
-from .redis_server_setting import redis_client
+from .redis_server import get_redis_client
 
-algorithm = 'RS256'
-private_key = load_private_key()
-public_key = load_public_key()
-def generate_token(user_id):
-    # 過期時間
-    token_expiration_hours = 1
+redis_client = get_redis_client()
+private_key, public_key = get_keys()
 
+def generate_token(user_id, token_expiration_hours = 1):
+    
     # jwt由三個部分组成，以"."分割成三部分，分别是：header、payload和signature
     headers = {
         'typ': 'JWT',  # 类型，固定为JWT
@@ -27,7 +25,8 @@ def generate_token(user_id):
     token = jwt.encode(headers=headers, payload=payload,
                        key=private_key, algorithm=algorithm
                        )
-    
+    # print("private_key",private_key)
+    # print("生成token",token)
     # redis保存token並設置過期時間
     redis_client.set(user_id, token, ex=token_expiration_hours * 3600)  # 3600秒 = 1小时
 
@@ -36,9 +35,9 @@ def delete_token(token):
     try:
         payload = jwt.decode(token, public_key, algorithms=[algorithm], options={"verify_exp": False})
         redis_client.delete(payload["user_id"])
-        return {"success":True, "message": "Token deleted"}
+        return {"success":True, "message": "Token deleted"}, 200
     except jwt.InvalidTokenError:
-        return {"success":False, "message": "Token delete failed"}
+        return {"success":False, "message": "Token delete failed"}, 401
     
 def verify_token(token):
     try:
@@ -46,12 +45,16 @@ def verify_token(token):
         payload = jwt.decode(token, public_key, algorithms=[algorithm])
 
         # 檢查 Redis 中是否存在該 token
-        redis_token = redis_client.get(payload['user_id'])
-
+        redis_token = redis_client.get(payload['user_id']).decode()
+        # print("redis_token ",redis_token )
+        # print("token", token)
         # 檢查 token 是否有效
         if redis_token == token:
+            print("成功")
             return {"success":True , "token": token}
+        
         else:
+            print("失敗")
             return {"success":False , "message": "Token does not exist"}
 
     except jwt.ExpiredSignatureError:

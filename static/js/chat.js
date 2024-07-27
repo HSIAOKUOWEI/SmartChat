@@ -18,19 +18,19 @@ document.addEventListener('DOMContentLoaded', () => {
     let countHistory = -10; // 保存每一次的对话记录
 
     window.onload = () => {
-        console.log("Window loaded");
+        // console.log("Window loaded");
         initializeModelSelection();
     };
     
     async function fetchModelList() {
-        console.log("Fetching model list...");
+        // console.log("Fetching model list...");
         try {
             const response = await fetch('/model_list');
             if (!response.ok) {
                 throw new Error('Network response was not ok ' + response.statusText);
             }
             const data = await response.json();
-            console.log("Fetched model list:", data);
+            // console.log("Fetched model list:", data);
             return data;
         } catch (error) {
             console.error('Error fetching model list:', error);
@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Main function to initialize the model selection
     async function initializeModelSelection() {
-        console.log("initializeModelSelection function called");
+        // console.log("initializeModelSelection function called");
         const modelSelect = document.getElementById('modelSelect');
         const modelNameSelect = document.getElementById('modelNameSelect');
     
@@ -579,7 +579,7 @@ document.addEventListener('DOMContentLoaded', () => {
         apiKeyInput.value = '';
         
         // Handle model change (you can add your logic here)
-        console.log('Selected model:', modelSelect.value);
+        // console.log('Selected model:', modelSelect.value);
     });
 
     // Initial call to adjust textarea height

@@ -1,6 +1,8 @@
 from flask import Blueprint, jsonify, request, render_template, redirect, url_for
-from models.user import User
-from models.jwt_utils import generate_token, verify_token, delete_token
+import requests
+
+from models.until.jwt_utils import generate_token, verify_token, delete_token
+from models.users import validate_credentials
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -25,16 +27,19 @@ def login():
             data = request.json
             username = data.get('username')
             password = data.get('password')
-            user = User.check_credentials(username = username, password = password)
 
-            # 登錄成功，生成token
-            if user["success"]:
-                token = generate_token(user_id = user["user_name"])
+             # 调用验证账号和密码的函数
+            validate_response, status_code = validate_credentials(username, password)
+
+            # 登录成功，生成token
+            if status_code == 200 and validate_response.get("success"):
+                token = generate_token(user_id=username)
                 if token["success"]:
-                    response = jsonify({"success": True, 
-                                        "message": "Login successful", 
-                                        "data": {}
-                                        })
+                    response = jsonify({
+                        "success": True,
+                        "message": "Login successful",
+                        "data": {}
+                    })
                     response.set_cookie('token', token["token"], httponly=True, samesite='Strict')  # 将token存储在cookie中
 
                     return response, 200
@@ -60,8 +65,8 @@ def login():
 def logout():
     try:
         token = request.cookies.get('token')
-        delete = delete_token(token)
-        if delete["success"]:
+        message,status = delete_token(token)
+        if status == 200:
             response = jsonify({
                 "success": True,
                 "message": "Logout successful",
@@ -75,7 +80,8 @@ def logout():
                 "message": "Invalid token",
                 "data": {}
             }), 401
-    
+        
+    # 服務器請求失敗 
     except Exception as e:
         return jsonify({
             "success": False,
