@@ -39,7 +39,7 @@
             }
 
             $.ajax({
-                url: '/forgot_password',
+                url: '/updatePassword',
                 type: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify({

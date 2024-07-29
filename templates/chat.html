@@ -6,6 +6,8 @@
     <title>Chat</title>
     <script src="{{ url_for('static', filename='js/chat.js') | cache_bust }}" type="module"></script>
     <script src="{{ url_for('static', filename='js/logout.js') | cache_bust }}" type="module"></script>
+    <!-- <script src="{{ url_for('static', filename='js/dialogue_management.js') | cache_bust }}" type="module"></script> -->
+
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') | cache_bust }}"> -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.5.1/styles/default.min.css">
@@ -37,6 +39,9 @@
                     </button>
                 </div>
             </div>
+        </div>
+        <div class="flex-1 overflow-y-auto sidebar-content">
+            <!-- Dialogue list will be dynamically populated here -->
         </div>
         <div class="mt-auto p-4">
             <button id="logoutBtn" class="w-full bg-red-500 text-white py-2 px-4 rounded hover:bg-red-600">Logout</button>

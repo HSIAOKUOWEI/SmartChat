@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from ..models.users import validate_credentials, register_user, update_password
+from models.crud_users import validate_credentials, register_user, update_password
 
 
 # 创建蓝图
@@ -28,11 +28,11 @@ def register():
     return jsonify(response), status_code
     
 # 重置密码 API
-@user_bp.route('/forgot_password', methods=['POST'])
-def forgot_password():
+@user_bp.route('/updatePassword', methods=['POST'])
+def updatePassword():
     data = request.get_json()
     account = data.get('username')
     new_password = data.get('new_password')
 
-    response, status_code = update_password(account, new_password)
+    response, status_code = update_password(account=account, new_password=new_password)
     return jsonify(response), status_code

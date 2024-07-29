@@ -5,7 +5,7 @@ from cryptography.hazmat.backends import default_backend
 from ..config import private_path, public_path
 
 
-def generate_keys(private_key_path=private_path, public_key_path=public_path):
+def generate_keys(private_key_path, public_key_path):
     # Generate private key
     private_key = rsa.generate_private_key(
         public_exponent=65537,
@@ -48,7 +48,7 @@ def get_keys(private_key_path=private_path, public_key_path=public_path):
         public_key_pem = load_key(public_key_path)
         
         if private_key_pem is None or public_key_pem is None:
-            private_key_pem, public_key_pem = generate_keys()
+            private_key_pem, public_key_pem = generate_keys(private_key_path=private_path, public_key_path=public_path)
         # print(private_path,)
         # print(public_key_pem)
         return private_key_pem, public_key_pem

@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const sidebarContent = document.querySelector('.sidebar-content');
+    
     const chatMessages = document.getElementById('chatMessages');
     const userInput = document.getElementById('userInput');
     const sendButton = document.getElementById('sendButton');
@@ -16,12 +16,10 @@ document.addEventListener('DOMContentLoaded', () => {
     let isWaitingForResponse = false; // New variable to track if we're waiting for a response
     let fullChatHistory = []; // 保存每一次的对话记录
     let countHistory = -10; // 保存每一次的对话记录
-    let currentDialogueId = "";
 
     window.onload = () => {
         // console.log("Window loaded");
         initializeModelSelection();
-        fetchAndDisplayDialogues();
     };
     
     async function fetchModelList() {
@@ -96,190 +94,8 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
         hljs.configure({ ignoreUnescapedHTML: true });
     }
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    async function fetchAndDisplayDialogues() {
-        try {
-            const response = await fetch('/get_dialogues');
-            const dialogues = await response.json();
-            console.log(dialogues)
-            displayDialogues(dialogues);
-        } catch (error) {
-            console.error('Error fetching dialogues:', error);
-        }
-    }
-
-    function displayDialogues(dialogues) {
-        sidebarContent.innerHTML = `
-            <button id="newDialogueBtn" class="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 mb-4">
-                New Dialogue
-            </button>
-            <div id="dialogueList"></div>
-        `;
-
-        const dialogueList = document.getElementById('dialogueList');
-        dialogues.forEach(dialogue => {
-            const dialogueEl = document.createElement('div');
-            dialogueEl.className = 'dialogue-item p-2 hover:bg-gray-200 cursor-pointer relative';
-            dialogueEl.innerHTML = `
-                <span>${dialogue.title}</span>
-                <span class="dialogue-actions hidden absolute right-2 top-2">⋮</span>
-            `;
-            dialogueEl.dataset.id = dialogue.id;
-            dialogueList.appendChild(dialogueEl);
-
-            dialogueEl.addEventListener('click', () => selectDialogue(dialogue.id));
-            dialogueEl.addEventListener('mouseenter', showDialogueActions);
-            dialogueEl.addEventListener('mouseleave', hideDialogueActions);
-        });
-
-        document.getElementById('newDialogueBtn').addEventListener('click', createNewDialogue);
-    }
-
-    function showDialogueActions(event) {
-        const actionsEl = event.currentTarget.querySelector('.dialogue-actions');
-        actionsEl.classList.remove('hidden');
-        actionsEl.addEventListener('click', showDialogueMenu);
-    }
-
-    function hideDialogueActions(event) {
-        const actionsEl = event.currentTarget.querySelector('.dialogue-actions');
-        actionsEl.classList.add('hidden');
-    }
-
-    function showDialogueMenu(event) {
-        event.stopPropagation();
-        const dialogueId = event.target.closest('.dialogue-item').dataset.id;
-        const menu = document.createElement('div');
-        menu.className = 'absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-10';
-        menu.innerHTML = `
-            <button class="block w-full text-left px-4 py-2 hover:bg-gray-100" data-action="rename">Rename</button>
-            <button class="block w-full text-left px-4 py-2 hover:bg-gray-100" data-action="delete">Delete</button>
-        `;
-        event.target.appendChild(menu);
-
-        menu.addEventListener('click', (e) => handleDialogueAction(e, dialogueId));
-
-        document.addEventListener('click', closeMenu);
-        function closeMenu() {
-            menu.remove();
-            document.removeEventListener('click', closeMenu);
-        }
-    }
-
-    function handleDialogueAction(event, dialogueId) {
-        const action = event.target.dataset.action;
-        if (action === 'rename') {
-            renameDialogue(dialogueId);
-        } else if (action === 'delete') {
-            deleteDialogue(dialogueId);
-        }
-    }
-
-    function renameDialogue(dialogueId) {
-        const dialogueEl = document.querySelector(`.dialogue-item[data-id="${dialogueId}"]`);
-        const titleSpan = dialogueEl.querySelector('span');
-        const currentTitle = titleSpan.textContent;
-        
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.value = currentTitle;
-        input.className = 'w-full p-1 border rounded';
-        
-        titleSpan.replaceWith(input);
-        input.focus();
-
-        input.addEventListener('blur', updateDialogueTitle);
-        input.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                updateDialogueTitle();
-            }
-        });
-
-        function updateDialogueTitle() {
-            const newTitle = input.value.trim();
-            if (newTitle && newTitle !== currentTitle) {
-                fetch(`/update_title/${dialogueId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ new_title: newTitle }),
-                })
-                .then(response => response.json())
-                .then(() => {
-                    titleSpan.textContent = newTitle;
-                    input.replaceWith(titleSpan);
-                })
-                .catch(error => {
-                    console.error('Error updating dialogue title:', error);
-                    input.replaceWith(titleSpan);
-                });
-            } else {
-                input.replaceWith(titleSpan);
-            }
-        }
-    }
-
-    function deleteDialogue(dialogueId) {
-        if (confirm('Are you sure you want to delete this dialogue?')) {
-            fetch(`/delete_dialogue/${dialogueId}`, {
-                method: 'DELETE',
-            })
-            .then(response => response.json())
-            .then(() => {
-                fetchAndDisplayDialogues();
-                if (currentDialogueId === dialogueId) {
-                    currentDialogueId = null;
-                    chatMessages.innerHTML = '';
-                }
-            })
-            .catch(error => console.error('Error deleting dialogue:', error));
-        }
-    }
-
-    function selectDialogue(dialogueId) {
-        currentDialogueId = dialogueId;
-        document.querySelectorAll('.dialogue-item').forEach(el => {
-            el.classList.remove('bg-blue-100');
-        });
-        document.querySelector(`.dialogue-item[data-id="${dialogueId}"]`).classList.add('bg-blue-100');
-        fetchDialogueMessages(dialogueId);
-    }
-
-    async function fetchDialogueMessages(dialogueId) {
-        try {
-            const response = await fetch(`/get_messages/${dialogueId}`);
-            const messages = await response.json();
-            fullChatHistory = messages; // 更新歷史訊息
-            displayMessages(messages);
-        } catch (error) {
-            console.error('Error fetching dialogue messages:', error);
-        }
-    }
-
-    function displayMessages(messages) {
-        chatMessages.innerHTML = '';
-        messages.forEach(message => {
-            if (message.role === 'user') {
-                displayUserMessage(message.content);
-            } else {
-                const botMessageDiv = document.createElement('div');
-                botMessageDiv.classList.add('mb-4', 'p-2', 'rounded', 'text-left', 'bg-gray-100', 'max-w-full', 'break-words', 'flex');
-                displayBotMessage(message.content, botMessageDiv, true, true);
-                chatMessages.appendChild(botMessageDiv);
-            }
-        });
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-    }
-
-    function createNewDialogue() {
-        currentDialogueId = null;
-        chatMessages.innerHTML = '';
-        document.querySelectorAll('.dialogue-item').forEach(el => {
-            el.classList.remove('bg-blue-100');
-        });
-    }
-//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    
+    
     // Function to adjust textarea height
     function adjustTextareaHeight() {
         userInput.style.height = 'auto';
@@ -335,8 +151,8 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.append('model_type', modelSelect.value);
         formData.append('model_name', modelNameSelect.value);
         formData.append('api_key', apiKeyInput.value);
-        formData.append('dialogue_id', currentDialogueId);
     
+
 
         // 提取最近countHistory次对话记录（2个字典代表一次對話）
         const recentHistory = fullChatHistory.slice(countHistory);
@@ -381,7 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            currentDialogueId = response.headers.get('dialogue_id');
+
             const reader = response.body.getReader();
             const decoder = new TextDecoder();
 
@@ -505,12 +321,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Function to display bot message
-    function displayBotMessage(message, botMessageDiv, showButtons = false, isHistory = false) {
-        if (!isHistory) {
-            // Clear existing content
-            botMessageDiv.innerHTML = '';
-        }
-        
+    function displayBotMessage(message, botMessageDiv, showButtons = false) {
+        // Clear existing content
+        botMessageDiv.innerHTML = '';
 
         // Add bot avatar
         const avatarDiv = document.createElement('div');

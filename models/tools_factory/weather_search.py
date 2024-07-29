@@ -36,7 +36,7 @@ def _handle_error(error: ToolException) -> str:
     return f"Failed to retrieve weather: `{error.args[0]}`"
 
 
-# 维基百科搜索
+# 獲取台灣城市天氣數據
 taiwan_weather = StructuredTool.from_function(
     func=get_weather_data,
     name="taiwai_weather",

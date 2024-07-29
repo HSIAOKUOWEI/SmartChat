@@ -1,8 +1,9 @@
 from flask import Blueprint, jsonify, request, render_template, redirect, url_for
-import requests
-
-from ..models.until.jwt_utils import generate_token, verify_token, delete_token
-from ..models.users import validate_credentials
+from models.until.jwt_utils import generate_token, verify_token, delete_token
+from models.crud_users import validate_credentials
+# import logging
+# # 配置日志记录
+# logging.basicConfig(filename='./app.log',level=logging.INFO)
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -31,9 +32,13 @@ def login():
              # 调用验证账号和密码的函数
             validate_response, status_code = validate_credentials(username, password)
 
+            # logging.info(f'Validation response: {validate_response}, status_code: {status_code}')
+
             # 登录成功，生成token
             if status_code == 200 and validate_response.get("success"):
-                token = generate_token(user_id=username)
+                token = generate_token(user_name = username, user_id=validate_response.get("user_id"))
+                # logging.info(f'Token generation response: {token}')
+
                 if token["success"]:
                     response = jsonify({
                         "success": True,
@@ -54,6 +59,8 @@ def login():
             
     # 服務器請求失敗 
     except Exception as e:
+        # logging.error(f'Exception occurred: {str(e)}')
+
         return jsonify({
             "success": False,
             "message": "An error occurred",
