@@ -30,7 +30,7 @@ llm = get_model(model_type="Openai", model_name="gpt-4o-mini", api_key=openai_ap
 agent = create_tool_calling_agent(llm=llm, tools=tools, prompt=prompt)
 agent_executor = AgentExecutor(agent=agent, tools=tools) # ,verbose=True
 # print(agent_executor.invoke({"input": "宜蘭和金門的天氣如何"}))
-input = "幫我查一下台灣的天氣，然後再查一下台南跟金門的天氣，然後再查一下2024年台灣總統是誰，再搜一下今年奧運會再在哪裡主辦，最後再幫我生成一張奧運獲獎的圖片"
+input = "幫我生兩張高解析度的騎車圖片"
 for chunk in agent_executor.stream({"input": input}):
     if "actions" in chunk:
         for action in chunk["actions"]:

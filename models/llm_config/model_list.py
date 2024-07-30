@@ -33,7 +33,7 @@ def get_model(model_type, model_name, api_key, temperature=0.7):
     
     elif model_type == "Google":
         from langchain_google_genai import ChatGoogleGenerativeAI
-        google_llm = ChatGoogleGenerativeAI(google_api_key="AIzaSyBraz_OmCCH7LW8ffESP0pItKjdtCTKMJQ",
+        google_llm = ChatGoogleGenerativeAI(google_api_key=api_key,
                                             model=model_name,
                                         temperature=temperature)
         return google_llm
@@ -44,28 +44,13 @@ def get_model(model_type, model_name, api_key, temperature=0.7):
                             model=model_name,
                             temperature=temperature)
         return groq_llm
+    elif model_type == "Siliconflow":
+        from langchain_openai import ChatOpenAI
+        base_url = "https://api.siliconflow.cn/v1"
+        siliconflow_llm = ChatOpenAI(api_key=api_key, 
+                                model=model_name,
+                                temperature=temperature,
+                                base_url=base_url)
+        return siliconflow_llm
     
 
-
-# def get_model(model_type, model_name, api_key, temperature=0.7):
-#     if model_type == "Openai":
-#         from langchain_openai import ChatOpenAI
-#         # gpt-4o, gpt-4o-mini
-#         openai_llm = ChatOpenAI(api_key=api_key, 
-#                                 model=MODEL_LIST_DETAILS[model_type][model_name],
-#                                 temperature=temperature)
-#         return openai_llm
-    
-#     elif model_type == "Google":
-#         from langchain_google_genai import ChatGoogleGenerativeAI
-#         google_llm = ChatGoogleGenerativeAI(google_api_key=api_key,
-#                                             model=MODEL_LIST_DETAILS[model_type][model_name],
-#                                         temperature=temperature)
-#         return google_llm
-    
-#     elif model_type == "Groq":
-#         from langchain_groq import ChatGroq
-#         groq_llm = ChatGroq(groq_api_key=api_key,
-#                             model=MODEL_LIST_DETAILS[model_type][model_name],
-#                             temperature=temperature)
-#         return groq_llm
