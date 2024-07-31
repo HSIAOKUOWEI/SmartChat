@@ -503,49 +503,7 @@ document.addEventListener('DOMContentLoaded', () => {
         chatMessages.appendChild(messageWrapper);
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
-    // New function to create and manage tool information display
-    // Function to create and manage tool information display
-    // Function to create and manage tool information display
-    function createToolInfoDisplay() {
-        const toolInfoDiv = document.createElement('div');
-        toolInfoDiv.classList.add('tool-info', 'mb-2', 'p-2', 'bg-gray-100', 'rounded');
-        
-        const toolsContainer = document.createElement('div');
-        toolsContainer.classList.add('tools-container');
-        
-        toolInfoDiv.appendChild(toolsContainer);
-        
-        return { toolInfoDiv, toolsContainer };
-    }
 
-    // Function to create a tool item
-    function createToolItem(toolName, toolInput) {
-        const toolItem = document.createElement('div');
-        toolItem.classList.add('tool-item', 'mb-2');
-        
-        const toolHeader = document.createElement('div');
-        toolHeader.classList.add('flex', 'justify-between', 'items-center', 'cursor-pointer', 'bg-gray-200', 'p-2', 'rounded');
-        toolHeader.innerHTML = `
-            <span>Calling Tool: ${toolName}</span>
-            <svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-            </svg>
-        `;
-        
-        const toolContent = document.createElement('div');
-        toolContent.classList.add('tool-content', 'mt-2', 'hidden', 'p-2', 'bg-white', 'rounded');
-        toolContent.innerHTML = `<strong>Input:</strong> ${escapeHtml(toolInput)}`;
-        
-        toolHeader.addEventListener('click', () => {
-            toolContent.classList.toggle('hidden');
-            toolHeader.querySelector('svg').classList.toggle('rotate-180');
-        });
-        
-        toolItem.appendChild(toolHeader);
-        toolItem.appendChild(toolContent);
-        
-        return toolItem;
-    }
     // Function to display bot message
     function displayBotMessage(message, botMessageDiv, showButtons = false, isHistory = false) {
         if (!isHistory) {
@@ -567,72 +525,25 @@ document.addEventListener('DOMContentLoaded', () => {
         const contentDiv = document.createElement('div');
         contentDiv.classList.add('flex-grow', 'flex', 'flex-col');
 
-        // Add tool info display
-        const { toolInfoDiv, toolsContainer } = createToolInfoDisplay();
-        contentDiv.appendChild(toolInfoDiv);
-
         // Display message text
         const textDiv = document.createElement('div');
         textDiv.classList.add('inline-block', 'p-2', 'rounded', 'bg-gray-300', 'text-black', 'max-w-full', 'whitespace-pre-wrap', 'break-words');
 
-         // Process the message
-        let currentTool = null;
-        let toolOutput = '';
-        let isInCodeBlock = false;
-        let codeBlockContent = '';
-        let codeLanguage = '';
-
-        const lines = message.split('\n');
-        lines.forEach(line => {
-            if (line.startsWith("Calling Tool:")) {
-                const match = line.match(/Calling Tool: `(.+?)` with input `(.+?)`/);
-                if (match) {
-                    const [_, toolName, toolInput] = match;
-                    const toolItem = createToolItem(toolName, toolInput);
-                    toolsContainer.appendChild(toolItem);
-                    currentTool = toolItem;
-                }
-            } else if (line === "action_result_finish") {
-                // Do nothing, wait for tool output
-            } else if (line === "tool_result_finish") {
-                if (currentTool && toolOutput) {
-                    const toolContent = currentTool.querySelector('.tool-content');
-                    toolContent.innerHTML += `<br><strong>Output:</strong><br>${formatToolOutput(toolOutput)}`;
-                    toolOutput = '';
-                }
-                currentTool = null;
-            } else if (currentTool) {
-                toolOutput += line + '\n';
-            } else {
-                if (line.startsWith("```")) {
-                    if (isInCodeBlock) {
-                        // End of code block
-                        isInCodeBlock = false;
-                        const highlightedCode = hljs.highlightAuto(codeBlockContent.trim(), codeLanguage ? [codeLanguage] : undefined).value;
-                        textDiv.innerHTML += `
-                            <div class="code-block bg-gray-800 rounded-lg p-4 my-2">
-                                <div class="flex justify-between items-center mb-2">
-                                    <span class="text-xs text-gray-400">${codeLanguage || 'Code'}</span>
-                                    <button class="copy-code-btn text-xs text-gray-400 hover:text-white">Copy Code</button>
-                                </div>
-                                <pre><code class="hljs ${codeLanguage || ''}">${highlightedCode}</code></pre>
-                            </div>
-                        `;
-                        codeBlockContent = '';
-                        codeLanguage = '';
-                    } else {
-                        // Start of code block
-                        isInCodeBlock = true;
-                        codeLanguage = line.slice(3).trim();
-                    }
-                } else if (isInCodeBlock) {
-                    codeBlockContent += line + '\n';
-                } else {
-                    textDiv.innerHTML += escapeHtml(line) + '\n';
-                }
-            }
+        // Check for code blocks and apply syntax highlighting
+        const formattedMessage = message.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, language, code) => {
+            const highlightedCode = hljs.highlightAuto(code.trim(), language ? [language] : undefined).value;
+            return `
+                <div class="code-block bg-gray-800 rounded-lg p-4 my-2">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-xs text-gray-400">${language || 'Code'}</span>
+                        <button class="copy-code-btn text-xs text-gray-400 hover:text-white">Copy Code</button>
+                    </div>
+                    <pre><code class="hljs ${language || ''}">${highlightedCode}</code></pre>
+                </div>
+            `;
         });
 
+        textDiv.innerHTML = formattedMessage;
         contentDiv.appendChild(textDiv);
 
        // Add copy and retry buttons after the message is fully displayed
@@ -693,12 +604,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         });
     }
-    // Helper function to format tool output
-    function formatToolOutput(output) {
-        // You can add more sophisticated formatting here if needed
-        return escapeHtml(output).replace(/\n/g, '<br>');
-    }    
-    
+
     // Function to open image in modal
     function openImageInModal(src) {
         const modal = document.createElement('div');

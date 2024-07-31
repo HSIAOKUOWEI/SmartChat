@@ -29,7 +29,7 @@ def get_user_id(token):
             raise Exception('User not found')
     return user_id
 
-# 对话框表
+# 對話框表
 class Dialogue:
     def __init__(self):
         self.collection = db['dialogues']
@@ -160,7 +160,6 @@ def save_message(user_id, dialogue_id, message_content):
     else:
         # 新建对话框并新增消息
         dialogue_title = dialogue.generate_title(message_content)
-        print(dialogue_title)
         dialogue_id = dialogue.create_dialogue(user_id, dialogue_title)
         message_id = message.add_message(dialogue_id, user_id, message_content)
     # 新增历史记录

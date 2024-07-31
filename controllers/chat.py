@@ -46,6 +46,8 @@ def agent_chat():
         user_message_content = {"role": "user","content": message}
 
         dialogue_id = save_message(user_id, dialogue_id, user_message_content)
+        headers = {"dialogue_id": dialogue_id} # 返回給前端
+
 
         # # 模拟机器人的响应
         # llm = get_model(model_type=model_type,model_name=model_name,api_key=api_key)
@@ -60,24 +62,26 @@ def agent_chat():
                 if "actions" in chunk:
                     for action in chunk["actions"]:
                         info = f"Calling Tool: `{action.tool}` with input `{action.tool_input}`\\n"
-                        # print(info)
-                        yield info
-                # elif "steps" in chunk:
-                #     print(chunk["steps"])
-                #     # for step in chunk["steps"]:
-                #     #     yield step.observation
-                #     # yield chunk["steps"]
+                        # 逐字输出
+                        for char in info:
+                            yield char
+                        yield "action_result_finish"  
+                elif "steps" in chunk:
+                    for step in chunk["steps"]:
+                        # 逐字输出 observation 内容
+                        observation = step.observation
+                        for char in observation:
+                            yield char
+                        yield 'tool_result_finish' 
                 elif "output" in chunk:
-                    response_content += chunk["output"]
-                    yield chunk["output"]
-                # yield f"data: {chunk.content}\n\n".encode('utf-8')  # 确保生成的内容是字节格式
-            # 保存机器人的响应
-            bot_message_content = {
-                "role": "assistant",
-                "content": response_content
-            }
+                    output = chunk["output"]
+                    response_content += output
+                    for char in output:
+                        yield char
+                    yield '\n'  # 添加换行符以区分不同步骤的结果  
+            # 保存結果        
+            bot_message_content = {"role": "assistant","content": response_content}
             save_message(user_id, dialogue_id, bot_message_content)
-        headers = {"dialogue_id": dialogue_id}
         # return Response(generate_response(message=message), mimetype='text/event-stream')
         return StreamWithHeaders(generate_response(message=message), headers=headers, mimetype='text/event-stream')
 

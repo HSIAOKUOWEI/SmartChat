@@ -6,8 +6,8 @@ google_api_key = os.getenv("GOOGLE_API_KEY")
 openai_api_key = os.getenv("OPENAI_API_KEY")
 groq_api_key = os.getenv("GROQ_API_KEY")
 
-from llm_config.model_list import get_model
-from tools_factory.all_tools import tools
+from .llm_config.model_list import get_model
+from .tools_factory.all_tools import tools
 from langchain.agents import AgentExecutor, create_tool_calling_agent
 from langchain_core.prompts import ChatPromptTemplate
 
@@ -30,21 +30,21 @@ llm = get_model(model_type="Openai", model_name="gpt-4o-mini", api_key=openai_ap
 agent = create_tool_calling_agent(llm=llm, tools=tools, prompt=prompt)
 agent_executor = AgentExecutor(agent=agent, tools=tools) # ,verbose=True
 # print(agent_executor.invoke({"input": "宜蘭和金門的天氣如何"}))
-input = "幫我生兩張高解析度的騎車圖片"
-for chunk in agent_executor.stream({"input": input}):
-    if "actions" in chunk:
-        for action in chunk["actions"]:
-            print(f"Calling Tool: `{action.tool}` with input `{action.tool_input}`")
-    # Observation
-    elif "steps" in chunk:
-        for step in chunk["steps"]:
-            print(f"Tool Result: `{step.observation}`") #api的結果
-    # Final result
-    elif "output" in chunk:
-        print(f'Final Output: {chunk["output"]}')
-    else:
-        raise ValueError()
-    print("---")
+# input = "今天台北的天氣怎麼樣，然後搜一下今天奧運的男子團體體操冠軍是哪一個國家"
+# for chunk in agent_executor.stream({"input": input}):
+#     if "actions" in chunk:
+#         for action in chunk["actions"]:
+#             print(f"Calling Tool: `{action.tool}` with input `{action.tool_input}`")
+#     # Observation
+#     elif "steps" in chunk:
+#         for step in chunk["steps"]:
+#             print(f"Tool Result: `{step.observation}`") #api的結果
+#     # Final result
+#     elif "output" in chunk:
+#         print(f'Final Output: {chunk["output"]}')
+#     else:
+#         raise ValueError()
+#     print("---")
 
 # import pprint
 
