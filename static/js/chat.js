@@ -503,48 +503,62 @@ document.addEventListener('DOMContentLoaded', () => {
         chatMessages.appendChild(messageWrapper);
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
-    // New function to create and manage tool information display
-    // Function to create and manage tool information display
-    // Function to create and manage tool information display
+
+    // Function to create tool info display
+    // Function to create tool info display
     function createToolInfoDisplay() {
         const toolInfoDiv = document.createElement('div');
-        toolInfoDiv.classList.add('tool-info', 'mb-2', 'p-2', 'bg-gray-100', 'rounded');
-        
-        const toolsContainer = document.createElement('div');
-        toolsContainer.classList.add('tools-container');
-        
-        toolInfoDiv.appendChild(toolsContainer);
-        
-        return { toolInfoDiv, toolsContainer };
-    }
+        toolInfoDiv.classList.add('tool-info', 'mb-2', 'p-2', 'bg-gray-100', 'rounded', 'hidden');
 
-    // Function to create a tool item
-    function createToolItem(toolName, toolInput) {
-        const toolItem = document.createElement('div');
-        toolItem.classList.add('tool-item', 'mb-2');
-        
         const toolHeader = document.createElement('div');
-        toolHeader.classList.add('flex', 'justify-between', 'items-center', 'cursor-pointer', 'bg-gray-200', 'p-2', 'rounded');
+        toolHeader.classList.add('flex', 'justify-between', 'items-center', 'cursor-pointer', 'bg-gray-200', 'p-2', 'rounded', 'mb-2');
         toolHeader.innerHTML = `
-            <span>Calling Tool: ${toolName}</span>
+            <span>调用工具中</span>
             <svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
             </svg>
         `;
-        
+
+        const toolsContainer = document.createElement('div');
+        toolsContainer.classList.add('tools-container', 'hidden');
+
+        toolHeader.addEventListener('click', () => {
+            toolsContainer.classList.toggle('hidden');
+            toolHeader.querySelector('svg').classList.toggle('rotate-180');
+        });
+
+        toolInfoDiv.appendChild(toolHeader);
+        toolInfoDiv.appendChild(toolsContainer);
+
+        return { toolInfoDiv, toolsContainer };
+    }
+
+    // Function to create a tool item
+    function createToolItem(toolName) {
+        const toolItem = document.createElement('div');
+        toolItem.classList.add('tool-item', 'mb-2');
+
+        const toolHeader = document.createElement('div');
+        toolHeader.classList.add('flex', 'justify-between', 'items-center', 'cursor-pointer', 'bg-gray-300', 'p-2', 'rounded');
+        toolHeader.innerHTML = `
+            <span>Tool: ${toolName}</span>
+            <svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+        `;
+
         const toolContent = document.createElement('div');
-        toolContent.classList.add('tool-content', 'mt-2', 'hidden', 'p-2', 'bg-white', 'rounded');
-        toolContent.innerHTML = `<strong>Input:</strong> ${escapeHtml(toolInput)}`;
-        
+        toolContent.classList.add('tool-content', 'hidden', 'mt-2', 'p-2', 'bg-white', 'rounded');
+
         toolHeader.addEventListener('click', () => {
             toolContent.classList.toggle('hidden');
             toolHeader.querySelector('svg').classList.toggle('rotate-180');
         });
-        
+
         toolItem.appendChild(toolHeader);
         toolItem.appendChild(toolContent);
-        
-        return toolItem;
+
+        return { toolItem, toolContent };
     }
     // Function to display bot message
     function displayBotMessage(message, botMessageDiv, showButtons = false, isHistory = false) {
@@ -575,12 +589,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const textDiv = document.createElement('div');
         textDiv.classList.add('inline-block', 'p-2', 'rounded', 'bg-gray-300', 'text-black', 'max-w-full', 'whitespace-pre-wrap', 'break-words');
 
-         // Process the message
+
+        // Process the message
         let currentTool = null;
         let toolOutput = '';
         let isInCodeBlock = false;
         let codeBlockContent = '';
         let codeLanguage = '';
+        let finalOutput = '';
+        let isToolInfoVisible = false;
 
         const lines = message.split('\n');
         lines.forEach(line => {
@@ -588,48 +605,75 @@ document.addEventListener('DOMContentLoaded', () => {
                 const match = line.match(/Calling Tool: `(.+?)` with input `(.+?)`/);
                 if (match) {
                     const [_, toolName, toolInput] = match;
-                    const toolItem = createToolItem(toolName, toolInput);
-                    toolsContainer.appendChild(toolItem);
-                    currentTool = toolItem;
+                    if (!isToolInfoVisible) {
+                        toolInfoDiv.classList.remove('hidden');
+                        isToolInfoVisible = true;
+                    }
+                    let toolItem, toolContent;
+                    const existingToolItem = toolsContainer.querySelector(`[data-tool-name="${toolName}"]`);
+                    if (existingToolItem) {
+                        toolItem = existingToolItem;
+                        toolContent = toolItem.querySelector('.tool-content');
+                    } else {
+                        ({ toolItem, toolContent } = createToolItem(toolName));
+                        toolItem.dataset.toolName = toolName;
+                        toolsContainer.appendChild(toolItem);
+                    }
+                    const inputDiv = document.createElement('div');
+                    inputDiv.innerHTML = `<strong>Input:</strong> ${escapeHtml(toolInput)}`;
+                    toolContent.appendChild(inputDiv);
+                    currentTool = { toolContent, outputDiv: document.createElement('div') };
+                    toolContent.appendChild(currentTool.outputDiv);
                 }
             } else if (line === "action_result_finish") {
                 // Do nothing, wait for tool output
             } else if (line === "tool_result_finish") {
-                if (currentTool && toolOutput) {
-                    const toolContent = currentTool.querySelector('.tool-content');
-                    toolContent.innerHTML += `<br><strong>Output:</strong><br>${formatToolOutput(toolOutput)}`;
+                if (currentTool) {
+                    currentTool.outputDiv.innerHTML = `<strong>Output:</strong><br>${formatToolOutput(toolOutput.trim())}`;
                     toolOutput = '';
                 }
                 currentTool = null;
             } else if (currentTool) {
                 toolOutput += line + '\n';
             } else {
-                if (line.startsWith("```")) {
-                    if (isInCodeBlock) {
-                        // End of code block
-                        isInCodeBlock = false;
-                        const highlightedCode = hljs.highlightAuto(codeBlockContent.trim(), codeLanguage ? [codeLanguage] : undefined).value;
-                        textDiv.innerHTML += `
-                            <div class="code-block bg-gray-800 rounded-lg p-4 my-2">
-                                <div class="flex justify-between items-center mb-2">
-                                    <span class="text-xs text-gray-400">${codeLanguage || 'Code'}</span>
-                                    <button class="copy-code-btn text-xs text-gray-400 hover:text-white">Copy Code</button>
-                                </div>
-                                <pre><code class="hljs ${codeLanguage || ''}">${highlightedCode}</code></pre>
+                finalOutput += line + '\n';
+            }
+        });
+
+        // Set the tool info div status to "调用工具完毕" if tools were used
+        if (isToolInfoVisible) {
+            toolInfoDiv.querySelector('span').textContent = "调用工具完毕";
+        } else {
+            toolInfoDiv.classList.add('hidden');
+        }
+
+        // Process the final output
+        finalOutput.split('\n').forEach(line => {
+            if (line.startsWith("```")) {
+                if (isInCodeBlock) {
+                    // End of code block
+                    isInCodeBlock = false;
+                    const highlightedCode = hljs.highlightAuto(codeBlockContent.trim(), codeLanguage ? [codeLanguage] : undefined).value;
+                    textDiv.innerHTML += `
+                        <div class="code-block bg-gray-800 rounded-lg p-4 my-2">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-xs text-gray-400">${codeLanguage || 'Code'}</span>
+                                <button class="copy-code-btn text-xs text-gray-400 hover:text-white">Copy Code</button>
                             </div>
-                        `;
-                        codeBlockContent = '';
-                        codeLanguage = '';
-                    } else {
-                        // Start of code block
-                        isInCodeBlock = true;
-                        codeLanguage = line.slice(3).trim();
-                    }
-                } else if (isInCodeBlock) {
-                    codeBlockContent += line + '\n';
+                            <pre><code class="hljs ${codeLanguage || ''}">${highlightedCode}</code></pre>
+                        </div>
+                    `;
+                    codeBlockContent = '';
+                    codeLanguage = '';
                 } else {
-                    textDiv.innerHTML += escapeHtml(line) + '\n';
+                    // Start of code block
+                    isInCodeBlock = true;
+                    codeLanguage = line.slice(3).trim();
                 }
+            } else if (isInCodeBlock) {
+                codeBlockContent += line + '\n';
+            } else {
+                textDiv.innerHTML += escapeHtml(line) + '\n';
             }
         });
 

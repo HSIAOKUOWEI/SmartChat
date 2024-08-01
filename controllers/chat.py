@@ -62,23 +62,37 @@ def agent_chat():
                 if "actions" in chunk:
                     for action in chunk["actions"]:
                         info = f"Calling Tool: `{action.tool}` with input `{action.tool_input}`\\n"
-                        # 逐字输出
+                        yield info
+                        print(info)
+                        # # 逐字输出
                         for char in info:
                             yield char
-                        yield "action_result_finish"  
-                elif "steps" in chunk:
-                    for step in chunk["steps"]:
-                        # 逐字输出 observation 内容
-                        observation = step.observation
-                        for char in observation:
-                            yield char
-                        yield 'tool_result_finish' 
+                    yield "action_result_finish" 
+
+                # elif "steps" in chunk:
+                #     for step in chunk["steps"]:
+                #         # 逐字输出 observation 内容
+                #         observation = step.observation
+                        
+                #         print(type(observation))
+                #             # Handle different formats for the observation
+                #         if isinstance(observation, dict):
+                #             observation = json.dumps(observation, ensure_ascii=False)
+                #         elif isinstance(observation, list):
+                #             observation = "\n".join(observation)
+                #         for char in observation:
+                #             yield char
+                #         yield 'tool_result_finish'
+                #     yield 'all_tools_finished'
                 elif "output" in chunk:
                     output = chunk["output"]
                     response_content += output
-                    for char in output:
-                        yield char
-                    yield '\n'  # 添加换行符以区分不同步骤的结果  
+                    yield str(output)
+                    print(output)
+                    # for char in output:
+                        
+                    #     yield char
+                    
             # 保存結果        
             bot_message_content = {"role": "assistant","content": response_content}
             save_message(user_id, dialogue_id, bot_message_content)
