@@ -3,7 +3,7 @@ from models.llm_config.model_list import get_model
 import json
 from models.agent_chat import agent_executor
 from models.crud_history import save_message,get_user_id
-
+import asyncio
 
 
 chat_bp = Blueprint('chat', __name__)
@@ -49,83 +49,57 @@ def agent_chat():
         headers = {"dialogue_id": dialogue_id} # 返回給前端
 
 
-        # # 模拟机器人的响应
-        # llm = get_model(model_type=model_type,model_name=model_name,api_key=api_key)
+        async def generate_response(input, userid=None, dialogueid=None):
+            async for event in agent_executor.astream_events({"input": input}, version="v1"):
+                if event["event"] == "on_chat_model_stream":
+                    content = event["data"]["chunk"].content
+                    if content:
+                        yield json.dumps({
+                                            "event": "chat_content",
+                                            "content": content
+                                        })
+                elif event["event"] == "on_tool_start":
+                    yield json.dumps({
+                                        "event": "start_tool",
+                                        "name": event["name"],
+                                        "inputs": event["data"].get("input")
+                                    })
+                elif event["event"] == "on_tool_end":
+                    yield json.dumps({
+                                            "event": "end_tool",
+                                            "name": event["name"],
+                                            "output": event["data"].get("output")
+                                        })
 
-        # def generate_response(message):
-        #     for chunk in llm.stream(message):
-        #         yield chunk.content   
 
-        def generate_response(message):
-            for chunk in agent_executor.stream({"input": message}):
-                response_content = ""
-                if "actions" in chunk:
-                    for action in chunk["actions"]:
-                        info = f"Calling Tool: `{action.tool}` with input `{action.tool_input}`\\n"
-                        yield info
-                        print(info)
-                        # # 逐字输出
-                        for char in info:
-                            yield char
-                    yield "action_result_finish" 
-
-                # elif "steps" in chunk:
-                #     for step in chunk["steps"]:
-                #         # 逐字输出 observation 内容
-                #         observation = step.observation
-                        
-                #         print(type(observation))
-                #             # Handle different formats for the observation
-                #         if isinstance(observation, dict):
-                #             observation = json.dumps(observation, ensure_ascii=False)
-                #         elif isinstance(observation, list):
-                #             observation = "\n".join(observation)
-                #         for char in observation:
-                #             yield char
-                #         yield 'tool_result_finish'
-                #     yield 'all_tools_finished'
-                elif "output" in chunk:
-                    output = chunk["output"]
-                    response_content += output
-                    yield str(output)
-                    print(output)
-                    # for char in output:
-                        
-                    #     yield char
-                    
-            # 保存結果        
-            bot_message_content = {"role": "assistant","content": response_content}
-            save_message(user_id, dialogue_id, bot_message_content)
-        # return Response(generate_response(message=message), mimetype='text/event-stream')
-        return StreamWithHeaders(generate_response(message=message), headers=headers, mimetype='text/event-stream')
+        def generate_response_sync(input):
+            async_gen = generate_response(input)
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                while True:
+                    yield loop.run_until_complete(async_gen.__anext__())
+            except StopAsyncIteration:
+                pass
+            finally:
+                loop.close()
+                
+                # elif event["event"] == "on_chat_model_error":
+                #     # 保存結果        
+                #     bot_message_content = {"role": "assistant","content": response_content}
+                #     save_message(user_id, dialogue_id, bot_message_content)
+        return StreamWithHeaders(generate_response_sync(input=message), headers=headers, mimetype='text/event-stream')
 
         
-            # return jsonify({
-            #     'success': True,
-            #     'message': 'Data received successfully',
-            #     'data': {
-            #         'text': message,
-            #         'files': [file.filename for file in files],
-            #         'images': images
-            #     }
-            # })
+        # return jsonify({
+        #     'success': True,
+        #     'message': 'Data received successfully',
+        #     'data': {
+        #         'text': message,
+        #         'files': [file.filename for file in files],
+        #         'images': images
+        #     }
+        # })
 
     return render_template('chat.html')
 
-# def generate_response(message):
-#     for chunk in llm.stream({"input": message}):
-#         if "actions" in chunk:
-#             for action in chunk["actions"]:
-#                 info = f"Calling Tool: `{action.tool}` with input `{action.tool_input}`"
-#                 print(info)
-#                 yield f"data: {info}\n\n".encode('utf-8')
-#         elif "steps" in chunk:
-#             for step in chunk["steps"]:
-#                 info = f"Tool Result: `{step.observation}`"
-#                 print(info)
-#                 yield f"data: {info}\n\n".encode('utf-8')
-#         elif "output" in chunk:
-#             info = f'Final Output: {chunk["output"]}'
-#             print(info)
-#             yield f"data: {info}\n\n".encode('utf-8')
-#         yield f"data: {chunk.content}\n\n".encode('utf-8')  # 确保生成的内容是字节格式

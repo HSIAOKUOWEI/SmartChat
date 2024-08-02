@@ -30,7 +30,7 @@ llm = get_model(model_type="Openai", model_name="gpt-4o-mini", api_key=openai_ap
 agent = create_tool_calling_agent(llm=llm, tools=tools, prompt=prompt)
 agent_executor = AgentExecutor(agent=agent, tools=tools) # ,verbose=True
 # print(agent_executor.invoke({"input": "宜蘭和金門的天氣如何"}))
-# input = "今天台北的天氣怎麼樣，然後搜一下今天奧運的男子團體體操冠軍是哪一個國家"
+# input = "幫我查一下台北天氣"
 # for chunk in agent_executor.stream({"input": input}):
 #     if "actions" in chunk:
 #         for action in chunk["actions"]:
@@ -46,15 +46,35 @@ agent_executor = AgentExecutor(agent=agent, tools=tools) # ,verbose=True
 #         raise ValueError()
 #     print("---")
 
-# import pprint
+# on_chat_model_stream 是模型最終的輸出
+# async def generate_response(input):
+#     async for event in agent_executor.astream_events({"input": input}, version="v1"):
+#         if event["event"] == "on_chain_end":
+#             print(event)
+            # if event["event"] == "on_chat_model_stream":
+            #      continue
+            #     # print(event["data"]["chunck"].content) # chunk一定會有的, 因為有on_chat_model_stream就會有chunk
+                 
+            # #     content = event["data"]["chunk"].content
+            # #     if content:
+            # #         # yield content
+            # #         print(content)
+            # elif event["event"] == "on_tool_start":
+            #     # 開始執行工具
+            #     # print(event)
+            #     # event['name'] 調用工具的名稱 'name': 'taiwai_weather'
+            #     # event["data"]["input"] 工具的輸入 'data': {'input': {'city': '臺南市'}}
+            #     # event["data"].get("input") 用get取值，有些工具不需要輸入參數，get就返回None
+            #     print(event['name'],": ",event["data"].get("input"))
+                
+            # elif event["event"] == "on_tool_end":
+            #     # 工具輸入結束後的回傳結果
+            #     # print(event)
+            #     # event['name'] 調用工具的名稱 'name': 'taiwai_weather'
+            #     # event['ouput'] 工具的輸出
+            #     print( event['name'],": ", event['data'].get('output'))
+            # else:
+            #      print(event)
 
-# chunks = []
-
-# for chunk in agent_executor.stream(
-#     {"input": "先寫一個排序算法,然後再幫我查一下台南跟金門的天氣,然後再維基百科查一下2024年台灣總統是誰，再搜一下今年奧運會再在哪裡主辦"}
-# ):
-#     chunks.append(chunk)
-#     print("------")
-#     print(chunk)
-
-# print("chuncks: ", chunks)
+# import asyncio
+# asyncio.run(generate_response(input=input))

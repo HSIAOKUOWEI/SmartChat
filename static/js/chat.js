@@ -505,7 +505,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Function to create tool info display
-    // Function to create tool info display
     function createToolInfoDisplay() {
         const toolInfoDiv = document.createElement('div');
         toolInfoDiv.classList.add('tool-info', 'mb-2', 'p-2', 'bg-gray-100', 'rounded', 'hidden');
@@ -590,92 +589,95 @@ document.addEventListener('DOMContentLoaded', () => {
         textDiv.classList.add('inline-block', 'p-2', 'rounded', 'bg-gray-300', 'text-black', 'max-w-full', 'whitespace-pre-wrap', 'break-words');
 
 
-        // Process the message
-        let currentTool = null;
-        let toolOutput = '';
+        let isToolInfoVisible = false;
+        let toolsMap = new Map();
         let isInCodeBlock = false;
         let codeBlockContent = '';
         let codeLanguage = '';
-        let finalOutput = '';
-        let isToolInfoVisible = false;
 
-        const lines = message.split('\n');
-        lines.forEach(line => {
-            if (line.startsWith("Calling Tool:")) {
-                const match = line.match(/Calling Tool: `(.+?)` with input `(.+?)`/);
-                if (match) {
-                    const [_, toolName, toolInput] = match;
+        const processMessage = (data) => {
+            try {
+                const jsonData = JSON.parse(data);
+                console.log(jsonData)
+                if (jsonData.event === "start_tool" || jsonData.event === "end_tool") {
                     if (!isToolInfoVisible) {
                         toolInfoDiv.classList.remove('hidden');
                         isToolInfoVisible = true;
                     }
+                    
                     let toolItem, toolContent;
-                    const existingToolItem = toolsContainer.querySelector(`[data-tool-name="${toolName}"]`);
-                    if (existingToolItem) {
-                        toolItem = existingToolItem;
-                        toolContent = toolItem.querySelector('.tool-content');
-                    } else {
-                        ({ toolItem, toolContent } = createToolItem(toolName));
-                        toolItem.dataset.toolName = toolName;
+                    if (!toolsMap.has(jsonData.name)) {
+                        ({ toolItem, toolContent } = createToolItem(jsonData.name));
+                        toolItem.dataset.toolName = jsonData.name;
                         toolsContainer.appendChild(toolItem);
+                        toolsMap.set(jsonData.name, { toolItem, toolContent, inputDiv: null, outputDiv: null });
+                    } else {
+                        ({ toolItem, toolContent } = toolsMap.get(jsonData.name));
                     }
-                    const inputDiv = document.createElement('div');
-                    inputDiv.innerHTML = `<strong>Input:</strong> ${escapeHtml(toolInput)}`;
-                    toolContent.appendChild(inputDiv);
-                    currentTool = { toolContent, outputDiv: document.createElement('div') };
-                    toolContent.appendChild(currentTool.outputDiv);
-                }
-            } else if (line === "action_result_finish") {
-                // Do nothing, wait for tool output
-            } else if (line === "tool_result_finish") {
-                if (currentTool) {
-                    currentTool.outputDiv.innerHTML = `<strong>Output:</strong><br>${formatToolOutput(toolOutput.trim())}`;
-                    toolOutput = '';
-                }
-                currentTool = null;
-            } else if (currentTool) {
-                toolOutput += line + '\n';
-            } else {
-                finalOutput += line + '\n';
-            }
-        });
 
-        // Set the tool info div status to "调用工具完毕" if tools were used
-        if (isToolInfoVisible) {
-            toolInfoDiv.querySelector('span').textContent = "调用工具完毕";
-        } else {
-            toolInfoDiv.classList.add('hidden');
-        }
-
-        // Process the final output
-        finalOutput.split('\n').forEach(line => {
-            if (line.startsWith("```")) {
-                if (isInCodeBlock) {
-                    // End of code block
-                    isInCodeBlock = false;
-                    const highlightedCode = hljs.highlightAuto(codeBlockContent.trim(), codeLanguage ? [codeLanguage] : undefined).value;
-                    textDiv.innerHTML += `
-                        <div class="code-block bg-gray-800 rounded-lg p-4 my-2">
-                            <div class="flex justify-between items-center mb-2">
-                                <span class="text-xs text-gray-400">${codeLanguage || 'Code'}</span>
-                                <button class="copy-code-btn text-xs text-gray-400 hover:text-white">Copy Code</button>
-                            </div>
-                            <pre><code class="hljs ${codeLanguage || ''}">${highlightedCode}</code></pre>
-                        </div>
-                    `;
-                    codeBlockContent = '';
-                    codeLanguage = '';
+                    if (jsonData.event === "start_tool") {
+                        const inputDiv = document.createElement('div');
+                        inputDiv.innerHTML = `<strong>Input:</strong> ${escapeHtml(JSON.stringify(jsonData.inputs))}`;
+                        toolContent.appendChild(inputDiv);
+                        toolsMap.get(jsonData.name).inputDiv = inputDiv;
+                    } else if (jsonData.event === "end_tool") {
+                        const outputDiv = document.createElement('div');
+                        outputDiv.innerHTML = `<strong>Output:</strong><br>${formatToolOutput(JSON.stringify(jsonData.output))}`;
+                        toolContent.appendChild(outputDiv);
+                        toolsMap.get(jsonData.name).outputDiv = outputDiv;
+                    }
                 } else {
-                    // Start of code block
-                    isInCodeBlock = true;
-                    codeLanguage = line.slice(3).trim();
+                    // 處理其他類型的JSON數據
+                    textDiv.innerHTML += escapeHtml(JSON.stringify(jsonData)) + '\n';
                 }
-            } else if (isInCodeBlock) {
-                codeBlockContent += line + '\n';
-            } else {
-                textDiv.innerHTML += escapeHtml(line) + '\n';
+            } catch (e) {
+                // 如果不是JSON，按照原來的邏輯處理
+                if (data.trim().startsWith("```")) {
+                    if (isInCodeBlock) {
+                        isInCodeBlock = false;
+                        const highlightedCode = hljs.highlightAuto(codeBlockContent.trim(), codeLanguage ? [codeLanguage] : undefined).value;
+                        textDiv.innerHTML += `
+                            <div class="code-block bg-gray-800 rounded-lg p-4 my-2">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-xs text-gray-400">${codeLanguage || 'Code'}</span>
+                                    <button class="copy-code-btn text-xs text-gray-400 hover:text-white">Copy Code</button>
+                                </div>
+                                <pre><code class="hljs ${codeLanguage || ''}">${highlightedCode}</code></pre>
+                            </div>
+                        `;
+                        codeBlockContent = '';
+                        codeLanguage = '';
+                    } else {
+                        isInCodeBlock = true;
+                        codeLanguage = data.slice(3).trim();
+                    }
+                } else if (isInCodeBlock) {
+                    codeBlockContent += data + '\n';
+                } else {
+                    textDiv.innerHTML += escapeHtml(data) + '\n';
+                }
             }
-        });
+        };
+
+    // Process the message
+    message.split('\n').forEach(processMessage);
+
+    // Set the tool info div status to "调用工具完毕" if tools were used
+    if (isToolInfoVisible) {
+        toolInfoDiv.querySelector('span').textContent = "调用工具完毕";
+    } else {
+        toolInfoDiv.classList.add('hidden');
+    }
+
+    // Process the message
+    message.split('\n').forEach(processMessage);
+
+    // Set the tool info div status to "调用工具完毕" if tools were used
+    if (isToolInfoVisible) {
+        toolInfoDiv.querySelector('span').textContent = "调用工具完毕";
+    } else {
+        toolInfoDiv.classList.add('hidden');
+    }
 
         contentDiv.appendChild(textDiv);
 
