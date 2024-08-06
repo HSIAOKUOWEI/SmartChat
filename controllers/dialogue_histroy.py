@@ -18,7 +18,7 @@ def get_dialogues():
         token = request.cookies.get('token')
         user_id = get_user_id(token)
         dialogues = get_user_dialogues(user_id)
-        print(dialogues)
+        # print(dialogues)
         return jsonify(dialogues), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 400

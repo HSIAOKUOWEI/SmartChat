@@ -1,5 +1,5 @@
 from flask import Flask, request, redirect, url_for, jsonify
-from controllers import auth_bp, chat_bp, modelList_bp, dialogue_bp, user_bp
+from controllers import auth_bp, chat_bp, modelList_bp, dialogue_bp, user_bp, file_bp
 # from controllers.auth import auth_bp
 # from controllers.chat import chat_bp
 # from controllers.model_list import modelList_bp
@@ -17,13 +17,14 @@ def cache_bust(url):
 def create_app():
     app = Flask(__name__, static_folder='static', static_url_path='/static')
 
-
     # 注册蓝图
     app.register_blueprint(auth_bp)
     app.register_blueprint(chat_bp)
     app.register_blueprint(modelList_bp)
     app.register_blueprint(user_bp)
     app.register_blueprint(dialogue_bp)
+    app.register_blueprint(file_bp)
+
 
     
     # 添加缓存清除过滤器
@@ -42,8 +43,13 @@ def create_app():
         verify = verify_token(token)
         # 验证失败，重定向到登录页面
         if not verify["success"]:
-            print("Invalid or expired token, redirecting to login.")
-            return redirect(url_for('auth.login'))
+            # 已登錄狀態，使用中token過期
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return jsonify({"redirect": url_for('auth.login')}), 401
+            else:
+                # 未登錄狀態，直接跳轉到登錄頁面
+                return redirect(url_for('auth.login'))
+
 
         # 更新 token 过期时间
         if token:

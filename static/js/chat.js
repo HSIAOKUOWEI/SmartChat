@@ -1,3 +1,6 @@
+// 导入并初始化模型选择
+import { initializeModelSelection } from './modelList.js';
+
 document.addEventListener('DOMContentLoaded', () => {
     const sidebarContent = document.querySelector('.sidebar-content');
     const chatMessages = document.getElementById('chatMessages');
@@ -13,95 +16,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let isApiKeyVisible = false;
     let uploadedFiles = [];
+    let uploadedFileIds = []; // 用于保存已上传文件和图片的 ID
     let isWaitingForResponse = false; // New variable to track if we're waiting for a response
     let fullChatHistory = []; // 保存每一次的对话记录
     let countHistory = -10; // 保存每一次的对话记录
-    let currentDialogueId = "";
+
+    let currentDialogueId = ""; // 当前對話框的id，初始為空
 
     window.onload = () => {
         // console.log("Window loaded");
-        initializeModelSelection();
-        fetchAndDisplayDialogues();
+        initializeModelSelection(); // Initialize model selection
+        fetchAndDisplayDialogues(); // 獲取對話框
     };
-    
-    async function fetchModelList() {
-        // console.log("Fetching model list...");
-        try {
-            const response = await fetch('/model_list');
-            if (!response.ok) {
-                throw new Error('Network response was not ok ' + response.statusText);
-            }
-            const data = await response.json();
-            // console.log("Fetched model list:", data);
-            return data;
-        } catch (error) {
-            console.error('Error fetching model list:', error);
-            return null;
-        }
-    }
-    
-    // Function to populate model types select element
-    function populateModelTypes(modelSelect, modelList) {
-        modelSelect.innerHTML = '';
-        modelList.forEach(item => {
-            const option = document.createElement('option');
-            option.value = item.category;
-            option.textContent = item.category;
-            modelSelect.appendChild(option);
-        });
-    }
-    
-    // Function to populate model names select element
-    function populateModelNames(modelNameSelect, modelList, modelType) {
-        modelNameSelect.innerHTML = '';
-        const selectedCategory = modelList.find(item => item.category === modelType);
-        if (selectedCategory) {
-            selectedCategory.models.forEach(model => {
-                const option = document.createElement('option');
-                option.value = model.value;
-                option.textContent = model.name;
-                modelNameSelect.appendChild(option);
-            });
-        }
-    }
-    
-    // Main function to initialize the model selection
-    async function initializeModelSelection() {
-        // console.log("initializeModelSelection function called");
-        const modelSelect = document.getElementById('modelSelect');
-        const modelNameSelect = document.getElementById('modelNameSelect');
-    
-        if (!modelSelect || !modelNameSelect) {
-            console.error("Couldn't find modelSelect or modelNameSelect elements");
-            return;
-        }
-    
-        const modelList = await fetchModelList();
-        if (!modelList) {
-            console.error('Failed to fetch model list');
-            return;
-        }
-    
-        populateModelTypes(modelSelect, modelList);
-        populateModelNames(modelNameSelect, modelList, modelSelect.value);
-    
-        modelSelect.addEventListener('change', () => {
-            populateModelNames(modelNameSelect, modelList, modelSelect.value);
-        });
-    }
 
-
+    
     if (typeof hljs === 'undefined') {
         console.error('highlight.js is not loaded');
     } else {
         hljs.configure({ ignoreUnescapedHTML: true });
     }
+
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     async function fetchAndDisplayDialogues() {
         try {
             const response = await fetch('/get_dialogues');
             const dialogues = await response.json();
-            console.log(dialogues)
+            // console.log(dialogues)
             displayDialogues(dialogues);
         } catch (error) {
             console.error('Error fetching dialogues:', error);
@@ -337,20 +277,17 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.append('api_key', apiKeyInput.value);
         formData.append('dialogue_id', currentDialogueId);
     
-
         // 提取最近countHistory次对话记录（2个字典代表一次對話）
         const recentHistory = fullChatHistory.slice(countHistory);
         formData.append('history', JSON.stringify(recentHistory));
 
-        // Process files
-        for (const file of uploadedFiles) {
-            if (file.type.startsWith('image/')) {
-                const imageUrl = URL.createObjectURL(file);
-                formData.append('images', imageUrl);
-            } else {
-                formData.append('files', file);
-            }
-        }
+        // 附加上传的文件和图片 ID 以及文件名
+        uploadedFileIds.forEach(fileInfo => {
+            formData.append(`${fileInfo.type}_ids`, JSON.stringify({
+                id: fileInfo.id,
+                name: fileInfo.name
+            }));
+        });
 
         // Create or clear bot message div
         if (!botMessageDiv) {
@@ -375,23 +312,64 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await fetch('/agent_chat', {
                 method: 'POST',
-                body: formData
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'  // 确保Ajax请求标志存在
+                }
             });
+            
+            // 使用中token過期，重定向到login 
+            if (response.status === 401) {
+                const responseData = await response.json();
+                if (responseData.redirect) {
+                    console.log(responseData.redirect)
+                    window.location.href = responseData.redirect;
+                    return;  // 停止后续代码执行
+                }
+            }
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             currentDialogueId = response.headers.get('dialogue_id');
             const reader = response.body.getReader();
-            const decoder = new TextDecoder();
 
+            const decoder = new TextDecoder();
             let botMessage = '';
+            let currentToolInfo = null; ///
+
+            
+
             while (true) {
                 const { done, value } = await reader.read();
                 if (done) break;
+    
                 const chunk = decoder.decode(value, { stream: true });
-                botMessage += chunk;
-                displayBotMessage(botMessage, botMessageDiv, false);
+                const lines = chunk.split('\n');  // 後端yield可能會一次返回多行數據，每一條數據以\n結束
+    
+                for (const line of lines) {
+                    if (line.trim() === '') continue;  // 跳過空行
+    
+                    try {
+                        const jsonData = JSON.parse(line);
+                        // console.log(jsonData);
+                        if (jsonData.event === "on_chat_model_stream") {
+                            botMessage += jsonData.content || '';  // 處理空內容
+                            displayBotMessage(botMessage, botMessageDiv, false);
+                        } else if (jsonData.event === "on_tool_start") {
+                            currentToolInfo = { name: jsonData.name, inputs: jsonData.inputs };
+                            updateToolInfo(botMessageDiv, currentToolInfo, 'start');
+                        } else if (jsonData.event === "on_tool_end") {
+                            if (currentToolInfo && currentToolInfo.name === jsonData.name) {
+                                currentToolInfo.output = jsonData.output;
+                                updateToolInfo(botMessageDiv, currentToolInfo, 'end');
+                                // currentToolInfo = null;
+                            }
+                        }
+                    } catch (e) {
+                        console.error('Error parsing JSON:', e,console.log(chunk));
+                    }
+                }
             }
 
             // Remove loading spinner
@@ -410,6 +388,7 @@ document.addEventListener('DOMContentLoaded', () => {
             displayBotMessage('An error occurred while processing your request.');
         } finally {
             uploadedFiles = [];
+            uploadedFileIds = []; // 清空上传的文件和图片ID
             sendButton.disabled = false;
             isWaitingForResponse = false; // Reset waiting flag
             if (retryButton) {
@@ -418,6 +397,93 @@ document.addEventListener('DOMContentLoaded', () => {
                 retryButton.style.cursor = 'pointer';
             }
         }
+    }
+
+
+     // New function to update tool information
+    function updateToolInfo(botMessageDiv, toolInfo, status) {
+        let toolInfoDiv = botMessageDiv.querySelector('.tool-info');
+        if (!toolInfoDiv) {
+            toolInfoDiv = createToolInfoDisplay().toolInfoDiv;
+            botMessageDiv.insertBefore(toolInfoDiv, botMessageDiv.firstChild);
+        }
+
+        let toolItem = toolInfoDiv.querySelector(`[data-tool-name="${toolInfo.name}"]`);
+        if (!toolItem) {
+            const { toolItem: newToolItem, toolContent } = createToolItem(toolInfo.name);
+            toolItem = newToolItem;
+            toolInfoDiv.querySelector('.tools-container').appendChild(toolItem);
+        }
+
+        const toolContent = toolItem.querySelector('.tool-content');
+        if (status === 'start') {
+            toolContent.innerHTML = `<strong>Input:</strong> ${escapeHtml(JSON.stringify(toolInfo.inputs))}`;
+        } else if (status === 'end') {
+            toolContent.innerHTML += `<br><strong>Output:</strong> ${formatToolOutput(JSON.stringify(toolInfo.output))}`;
+        }
+
+        toolInfoDiv.classList.remove('hidden');
+    }
+    // 创建工具信息显示区的函数
+    function createToolInfoDisplay() {
+        const toolInfoDiv = document.createElement('div');
+        toolInfoDiv.classList.add('tool-info', 'mb-2', 'p-2', 'bg-gray-100', 'rounded', 'hidden');
+
+        const toolHeader = document.createElement('div');
+        toolHeader.classList.add('flex', 'justify-between', 'items-center', 'cursor-pointer', 'bg-gray-200', 'p-2', 'rounded', 'mb-2');
+        toolHeader.innerHTML = `
+            <span>调用工具中</span>
+            <svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+        `;
+
+        const toolsContainer = document.createElement('div');
+        toolsContainer.classList.add('tools-container', 'hidden');
+
+        toolHeader.addEventListener('click', () => {
+            toolsContainer.classList.toggle('hidden');
+            toolHeader.querySelector('svg').classList.toggle('rotate-180');
+        });
+
+        toolInfoDiv.appendChild(toolHeader);
+        toolInfoDiv.appendChild(toolsContainer);
+
+        return { toolInfoDiv, toolsContainer };
+    }
+
+    // 创建工具项目的函数
+    function createToolItem(toolName) {
+        const toolItem = document.createElement('div');
+        toolItem.classList.add('tool-item', 'mb-2');
+
+        const toolHeader = document.createElement('div');
+        toolHeader.classList.add('flex', 'justify-between', 'items-center', 'cursor-pointer', 'bg-gray-300', 'p-2', 'rounded');
+        toolHeader.innerHTML = `
+            <span>Tool: ${toolName}</span>
+            <svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+        `;
+
+        const toolContent = document.createElement('div');
+        toolContent.classList.add('tool-content', 'hidden', 'mt-2', 'p-2', 'bg-white', 'rounded');
+
+        toolHeader.addEventListener('click', () => {
+            toolContent.classList.toggle('hidden');
+            toolHeader.querySelector('svg').classList.toggle('rotate-180');
+        });
+
+        toolItem.appendChild(toolHeader);
+        toolItem.appendChild(toolContent);
+
+        return { toolItem, toolContent };
+    }
+
+    // Helper function to format tool output
+    function formatToolOutput(output) {
+        // You can add more sophisticated formatting here if needed
+        return escapeHtml(output).replace(/\n/g, '<br>');
     }
 
     // Function to display user message
@@ -504,61 +570,6 @@ document.addEventListener('DOMContentLoaded', () => {
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
-    // Function to create tool info display
-    function createToolInfoDisplay() {
-        const toolInfoDiv = document.createElement('div');
-        toolInfoDiv.classList.add('tool-info', 'mb-2', 'p-2', 'bg-gray-100', 'rounded', 'hidden');
-
-        const toolHeader = document.createElement('div');
-        toolHeader.classList.add('flex', 'justify-between', 'items-center', 'cursor-pointer', 'bg-gray-200', 'p-2', 'rounded', 'mb-2');
-        toolHeader.innerHTML = `
-            <span>调用工具中</span>
-            <svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-            </svg>
-        `;
-
-        const toolsContainer = document.createElement('div');
-        toolsContainer.classList.add('tools-container', 'hidden');
-
-        toolHeader.addEventListener('click', () => {
-            toolsContainer.classList.toggle('hidden');
-            toolHeader.querySelector('svg').classList.toggle('rotate-180');
-        });
-
-        toolInfoDiv.appendChild(toolHeader);
-        toolInfoDiv.appendChild(toolsContainer);
-
-        return { toolInfoDiv, toolsContainer };
-    }
-
-    // Function to create a tool item
-    function createToolItem(toolName) {
-        const toolItem = document.createElement('div');
-        toolItem.classList.add('tool-item', 'mb-2');
-
-        const toolHeader = document.createElement('div');
-        toolHeader.classList.add('flex', 'justify-between', 'items-center', 'cursor-pointer', 'bg-gray-300', 'p-2', 'rounded');
-        toolHeader.innerHTML = `
-            <span>Tool: ${toolName}</span>
-            <svg class="w-4 h-4 transform transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-            </svg>
-        `;
-
-        const toolContent = document.createElement('div');
-        toolContent.classList.add('tool-content', 'hidden', 'mt-2', 'p-2', 'bg-white', 'rounded');
-
-        toolHeader.addEventListener('click', () => {
-            toolContent.classList.toggle('hidden');
-            toolHeader.querySelector('svg').classList.toggle('rotate-180');
-        });
-
-        toolItem.appendChild(toolHeader);
-        toolItem.appendChild(toolContent);
-
-        return { toolItem, toolContent };
-    }
     // Function to display bot message
     function displayBotMessage(message, botMessageDiv, showButtons = false, isHistory = false) {
         if (!isHistory) {
@@ -580,104 +591,44 @@ document.addEventListener('DOMContentLoaded', () => {
         const contentDiv = document.createElement('div');
         contentDiv.classList.add('flex-grow', 'flex', 'flex-col');
 
-        // Add tool info display
-        const { toolInfoDiv, toolsContainer } = createToolInfoDisplay();
-        contentDiv.appendChild(toolInfoDiv);
 
         // Display message text
         const textDiv = document.createElement('div');
         textDiv.classList.add('inline-block', 'p-2', 'rounded', 'bg-gray-300', 'text-black', 'max-w-full', 'whitespace-pre-wrap', 'break-words');
 
 
-        let isToolInfoVisible = false;
-        let toolsMap = new Map();
         let isInCodeBlock = false;
         let codeBlockContent = '';
         let codeLanguage = '';
 
-        const processMessage = (data) => {
-            try {
-                const jsonData = JSON.parse(data);
-                console.log(jsonData)
-                if (jsonData.event === "start_tool" || jsonData.event === "end_tool") {
-                    if (!isToolInfoVisible) {
-                        toolInfoDiv.classList.remove('hidden');
-                        isToolInfoVisible = true;
-                    }
-                    
-                    let toolItem, toolContent;
-                    if (!toolsMap.has(jsonData.name)) {
-                        ({ toolItem, toolContent } = createToolItem(jsonData.name));
-                        toolItem.dataset.toolName = jsonData.name;
-                        toolsContainer.appendChild(toolItem);
-                        toolsMap.set(jsonData.name, { toolItem, toolContent, inputDiv: null, outputDiv: null });
-                    } else {
-                        ({ toolItem, toolContent } = toolsMap.get(jsonData.name));
-                    }
-
-                    if (jsonData.event === "start_tool") {
-                        const inputDiv = document.createElement('div');
-                        inputDiv.innerHTML = `<strong>Input:</strong> ${escapeHtml(JSON.stringify(jsonData.inputs))}`;
-                        toolContent.appendChild(inputDiv);
-                        toolsMap.get(jsonData.name).inputDiv = inputDiv;
-                    } else if (jsonData.event === "end_tool") {
-                        const outputDiv = document.createElement('div');
-                        outputDiv.innerHTML = `<strong>Output:</strong><br>${formatToolOutput(JSON.stringify(jsonData.output))}`;
-                        toolContent.appendChild(outputDiv);
-                        toolsMap.get(jsonData.name).outputDiv = outputDiv;
-                    }
-                } else {
-                    // 處理其他類型的JSON數據
-                    textDiv.innerHTML += escapeHtml(JSON.stringify(jsonData)) + '\n';
-                }
-            } catch (e) {
-                // 如果不是JSON，按照原來的邏輯處理
-                if (data.trim().startsWith("```")) {
-                    if (isInCodeBlock) {
-                        isInCodeBlock = false;
-                        const highlightedCode = hljs.highlightAuto(codeBlockContent.trim(), codeLanguage ? [codeLanguage] : undefined).value;
-                        textDiv.innerHTML += `
-                            <div class="code-block bg-gray-800 rounded-lg p-4 my-2">
-                                <div class="flex justify-between items-center mb-2">
-                                    <span class="text-xs text-gray-400">${codeLanguage || 'Code'}</span>
-                                    <button class="copy-code-btn text-xs text-gray-400 hover:text-white">Copy Code</button>
-                                </div>
-                                <pre><code class="hljs ${codeLanguage || ''}">${highlightedCode}</code></pre>
+        const lines = message.split('\n');
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            if (line.trim().startsWith("```")) {
+                if (isInCodeBlock) {
+                    isInCodeBlock = false;
+                    const highlightedCode = hljs.highlightAuto(codeBlockContent.trim(), codeLanguage ? [codeLanguage] : undefined).value;
+                    textDiv.innerHTML += `
+                        <div class="code-block bg-gray-800 rounded-lg p-4 my-2">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-xs text-gray-400">${codeLanguage || 'Code'}</span>
+                                <button class="copy-code-btn text-xs text-gray-400 hover:text-white">Copy Code</button>
                             </div>
-                        `;
-                        codeBlockContent = '';
-                        codeLanguage = '';
-                    } else {
-                        isInCodeBlock = true;
-                        codeLanguage = data.slice(3).trim();
-                    }
-                } else if (isInCodeBlock) {
-                    codeBlockContent += data + '\n';
+                            <pre><code class="hljs ${codeLanguage || ''}">${highlightedCode}</code></pre>
+                        </div>
+                    `;
+                    codeBlockContent = '';
+                    codeLanguage = '';
                 } else {
-                    textDiv.innerHTML += escapeHtml(data) + '\n';
+                    isInCodeBlock = true;
+                    codeLanguage = line.slice(3).trim();
                 }
+            } else if (isInCodeBlock) {
+                codeBlockContent += line + '\n';
+            } else {
+                textDiv.innerHTML += escapeHtml(line) + '\n';
             }
-        };
-
-    // Process the message
-    message.split('\n').forEach(processMessage);
-
-    // Set the tool info div status to "调用工具完毕" if tools were used
-    if (isToolInfoVisible) {
-        toolInfoDiv.querySelector('span').textContent = "调用工具完毕";
-    } else {
-        toolInfoDiv.classList.add('hidden');
-    }
-
-    // Process the message
-    message.split('\n').forEach(processMessage);
-
-    // Set the tool info div status to "调用工具完毕" if tools were used
-    if (isToolInfoVisible) {
-        toolInfoDiv.querySelector('span').textContent = "调用工具完毕";
-    } else {
-        toolInfoDiv.classList.add('hidden');
-    }
+        }
 
         contentDiv.appendChild(textDiv);
 
@@ -740,10 +691,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     // Helper function to format tool output
-    function formatToolOutput(output) {
-        // You can add more sophisticated formatting here if needed
-        return escapeHtml(output).replace(/\n/g, '<br>');
-    }    
+
     
     // Function to open image in modal
     function openImageInModal(src) {
@@ -860,14 +808,101 @@ document.addEventListener('DOMContentLoaded', () => {
         return previewDiv;
     }
 
-    // Handle paste event for image upload
-    document.addEventListener('paste', (e) => {
+    // Function to handle image uploads
+    async function handleImageUpload(image) {
+        const formData = new FormData();
+        // Encode the filename to handle Chinese characters
+        const encodedFileName = encodeURIComponent(image.name);
+        formData.append('image', image);
+
+        try {
+            const response = await fetch('/image/upload', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to upload image');
+            }
+
+            const data = await response.json();
+            return data.image_id;
+        } catch (error) {
+            console.error('Error uploading image:', error);
+            alert('Failed to upload image');
+        }
+    }
+
+    // Function to handle file uploads
+    async function handleFileUpload(file) {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const response = await fetch('/file/upload', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to upload file');
+            }
+
+            const data = await response.json();
+            return data.file_id;
+        } catch (error) {
+            console.error('Error uploading file:', error);
+            alert('Failed to upload file');
+        }
+    }
+
+    // 在文件输入更改事件监听器中
+    fileInput.addEventListener('change', async () => {
+        for (const file of fileInput.files) {
+            uploadedFiles.push(file);
+            const previewDiv = createFilePreview(file);
+            attachments.appendChild(previewDiv);
+
+            // 上传文件或图片并保存 ID 和文件名
+            if (file.type.startsWith('image/')) {
+                const imageId = await handleImageUpload(file);
+                if (imageId) {
+                    uploadedFileIds.push({ type: 'image', id: imageId, name: file.name });
+                    console.log('Uploaded image ID:', imageId, 'Name:', file.name);
+                }
+            } else {
+                const fileId = await handleFileUpload(file);
+                if (fileId) {
+                    uploadedFileIds.push({ type: 'file', id: fileId, name: file.name });
+                    console.log('Uploaded file ID:', fileId, 'Name:', file.name);
+                }
+            }
+        }
+    });
+
+    // 在粘贴事件监听器中也进行类似的修改
+    document.addEventListener('paste', async (e) => {
         if (e.clipboardData && e.clipboardData.files.length) {
             for (let i = 0; i < e.clipboardData.files.length; i++) {
                 const file = e.clipboardData.files[i];
                 uploadedFiles.push(file);
                 const previewDiv = createFilePreview(file);
                 attachments.appendChild(previewDiv);
+
+                // 上传文件或图片并保存 ID 和文件名
+                if (file.type.startsWith('image/')) {
+                    const imageId = await handleImageUpload(file);
+                    if (imageId) {
+                        uploadedFileIds.push({ type: 'image', id: imageId, name: file.name });
+                        console.log('Uploaded image ID:', imageId, 'Name:', file.name);
+                    }
+                } else {
+                    const fileId = await handleFileUpload(file);
+                    if (fileId) {
+                        uploadedFileIds.push({ type: 'file', id: fileId, name: file.name });
+                        console.log('Uploaded file ID:', fileId, 'Name:', file.name);
+                    }
+                }
             }
         }
     });
@@ -886,14 +921,8 @@ document.addEventListener('DOMContentLoaded', () => {
             sendMessage();
         }
     });
+
     attachButton.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', () => {
-        Array.from(fileInput.files).forEach(file => {
-            uploadedFiles.push(file);
-            const previewDiv = createFilePreview(file);
-            attachments.appendChild(previewDiv);
-        });
-    });
 
     toggleApiKey.addEventListener('click', () => {
         isApiKeyVisible = !isApiKeyVisible;

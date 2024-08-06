@@ -12,6 +12,8 @@ users_collection = db['users']
 account_regex = re.compile(r'^[a-zA-Z0-9_]+$')
 password_regex = re.compile(r'^[a-zA-Z0-9_@#$%^&+=]+$')
 
+
+
 # 驗證賬密是否合規
 def validate_user(account, password):
     if not account or not password:
