@@ -20,11 +20,13 @@
 
 ## 功能簡介
 
-描述項目的主要功能和特點，例如：
+基礎功能:
 - 用戶註冊和登錄
 - 會話管理
 - 文件上傳和處理
 - 聊天歷史記錄
+對話功能
+
 
 ## 功能展示
 
@@ -35,8 +37,8 @@
 列出項目使用的主要技術，包括但不限於：
 - 前端：HTML、JavaScript、TailwindCSS
 - 後端：Flask
-- 數據庫：MongoDB、Redis
-- 容器化：Docker
+- 數據庫：MongoDB、
+- 緩存：Redis
 
 ## 功能模塊
 
@@ -52,8 +54,8 @@
 
 1. 克隆本項目：
     ```bash
-    git clone https://github.com/yourusername/yourproject.git
-    cd yourproject
+    https://github.com/HSIAOKUOWEI/LLM_Ageng_flask.git
+    cd LLM_Ageng_flask
     ```
 
 2. 安裝依賴：
@@ -63,25 +65,24 @@
 
 3. 配置環境變量：
     ```bash
-    export FLASK_APP=app.py
-    export FLASK_ENV=development
+    .env
     ```
 
 4. 運行項目：
     ```bash
-    flask run
+    python app.py
     ```
 
 ### Docker部署
 
 1. 構建Docker鏡像：
     ```bash
-    docker build -t yourproject .
+    docker build
     ```
 
 2. 運行Docker容器：
     ```bash
-    docker run -d -p 5000:5000 yourproject
+    docker-compose up
     ```
 
 ## MongoDB表的設計
