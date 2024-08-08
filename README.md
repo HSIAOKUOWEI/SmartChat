@@ -15,7 +15,6 @@ SmartChat是一款基於Agent思想構建的開源智能聊天機器人。SmartC
   - [消息表(messages)](#消息表(messages))
   - [儲存文件表(user_file)](#儲存文件表(user_file))
   - [儲存圖片表(user_image)](#儲存圖片表(user_image))
-
 - [目錄結構](#目錄結構)
 
 ## 技術棧
