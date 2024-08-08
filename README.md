@@ -52,46 +52,53 @@ UI基礎功能:
 
 ## 部署
 
-### 克隆本項目：
+### 本地部署
+
+1.下載倉庫：
     ```bash
     git clone https://github.com/HSIAOKUOWEI/LLM_Ageng_flask.git
     cd LLM_Ageng_flask
     ```
 
-### 本地部署
-1. 創建並激活虛擬環境：
+2. 創建並激活虛擬環境：
     ```bash
     conda create -n SmartChat python=3.10
     conda activate SmartChat
 
-2. 安裝依賴：
+3. 安裝依賴：
     ```bash
     pip install -r requirements.txt
     ```
 
-3. 配置環境變量：
+4. 配置環境變量：
     ```bash
     mv .env.example .env
     ```
 
-4. 運行項目：
+5. 運行項目：
     ```bash
     python app.py
     ```
 
 ### Docker部署
 
-1. 配置環境變量：
+1.下載倉庫：
+    ```bash
+    git clone https://github.com/HSIAOKUOWEI/LLM_Ageng_flask.git
+    cd LLM_Ageng_flask
+    ```
+
+2. 配置環境變量：
     ```bash
     mv .env.example .env
     ```
 
-2. 構建Docker鏡像：
+3. 構建Docker鏡像：
     ```bash
     docker build
     ```
 
-3. 運行Docker容器：
+4. 運行Docker容器：
     ```bash
     docker-compose up
     ```
