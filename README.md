@@ -20,12 +20,13 @@ SmartChat是一款基於Agent思想構建的開源智能聊天機器人。SmartC
 ## 技術棧
 
 項目使用的主要技術如下：
-- 前端：HTML、JavaScript、TailwindCSS
-- 後端：Flask
-- 數據庫：MongoDB
-- 緩存：Redis
-- LLM開發框架：Langchain
-- 向量數據庫：Chroma
+- 前端：[HTML](https://developer.mozilla.org/zh-CN/docs/Web/HTML)、[JavaScript](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript)、[TailwindCSS](https://tailwindcss.com/)
+- 後端：[Flask](https://flask.palletsprojects.com/)
+- 數據庫：[MongoDB](https://www.mongodb.com/)
+- 緩存：[Redis](https://redis.io/)
+- LLM API：[OpenAI](https://www.openai.com/)、[Google AI](https://ai.google/)、[Groq](https://groq.com/)、[Siliconflow](https://siliconflow.ai/)
+- LLM開發框架：[Langchain](https://www.langchain.com/)
+- 向量數據庫：[Chroma](https://www.trychroma.com/)
 
 ## 功能簡介
 
