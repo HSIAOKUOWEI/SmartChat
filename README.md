@@ -81,8 +81,7 @@ UI基礎功能:
     ```
 
 ### Docker部署
-
-1.下載倉庫：
+1. 下載倉庫：
     ```bash
     git clone https://github.com/HSIAOKUOWEI/LLM_Ageng_flask.git
     cd LLM_Ageng_flask
