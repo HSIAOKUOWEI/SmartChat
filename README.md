@@ -48,7 +48,7 @@ UI基礎功能:
 
 ## 功能展示
 
-(https://github.com/user-attachments/assets/0dc61ef9-89f1-4985-9d7f-7de3da063bf0)
+[![功能展示視頻](http://img.youtube.com/vi/VIDEO_ID/0.jpg)](https://github.com/user-attachments/assets/0dc61ef9-89f1-4985-9d7f-7de3da063bf0)
 
 
 ## 部署
