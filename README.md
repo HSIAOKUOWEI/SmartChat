@@ -6,7 +6,6 @@ SmartChat是一款基於Agent思想構建的開源智能聊天機器人。SmartC
 - [技術棧](#技術棧)
 - [功能簡介](#功能簡介)
 - [功能展示](#功能展示)
-- [功能模塊](#功能模塊)
 - [部署](#部署)
   - [本地部署](#本地部署)
   - [Docker部署](#Docker部署)
@@ -150,10 +149,13 @@ UI基礎功能:
 llm_flask/
 ├── controllers/           # 控制器層(api)
 ├── models/                # 模型層(處理邏輯)
+│   ├── llm_config/        # LLM配置
+│   ├── tools_factory/     # 服務工具類
+│   ├── until/             # 數據庫及加密相關配置
 │   ├── config.py          # 後端配置文件
 ├── static/                # 靜態文件
 ├── templates/             # 模板文件(展示資料)
-├── .env                   # API KEY環境變量配置
+├── .env.example           # API KEY環境變量配置
 ├── .gitignore             # Git 忽略文件
 ├── app.py                 # 應用主文件
 ├── docker-compose.yml     # Docker Compose 配置文件
