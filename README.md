@@ -42,7 +42,7 @@ SmartChat對話中支持的服務如下:
 
 UI基礎功能:
 - 切換LLM模型
-- 帳號jwt登錄丶註冊丶重置密碼丶登出
+- 帳號登錄丶註冊丶重置密碼丶登出
 - 聊天話框管理(新增丶刪除丶改名丶切換)
 - 文件及圖片上傳
 
@@ -99,16 +99,17 @@ UI基礎功能:
 | _id         | ObjectId  | MongoDB自動生成的唯一標識符 |
 | account     | String    | 用戶賬號                   |
 | password    | String    | 用戶密碼                   |
-| created_at  | ISODate   | 用戶註冊時間               |
 | last_login  | ISODate   | 用戶最後登錄時間           |
+| password_last_modified  | ISODate   | 密碼更改時間    |
+
 
 ### 對話框表(dialogues)
 
 | 字段名      | 類型      | 描述                       |
 |-------------|-----------|----------------------------|
 | _id         | ObjectId  | 對話框的唯一標識符         |
-| user_id     | ObjectId  | 創建對話框的用戶標識符     |
-| title       | String    | 對話框的標題               |
+| user_id     | ObjectId  | 用戶標識符                  |
+| title       | String    | 對話框標題                  |
 | created_at  | ISODate   | 對話框的創建時間           |
 | updated_at  | ISODate   | 對話框的最後更新時間       |
 
@@ -117,10 +118,9 @@ UI基礎功能:
 | 字段名      | 類型      | 描述                       |
 |-------------|-----------|----------------------------|
 | _id         | ObjectId  | 消息的唯一標識符           |
-| dialogue_id | ObjectId  | 關聯到對話框的標識符       |
-| user_id     | ObjectId  | 發送消息的用戶標識符       |
+| user_id     | ObjectId  | 用戶標識符                  |
+| dialogue_id | ObjectId  | 對話框的標識符              |  
 | messages    | Array     | 消息內容的數組             |
-| timestamp   | ISODate   | 消息的創建時間             |
 | updated_at  | ISODate   | 消息的最後更新時間         |
 
 ### 儲存文件表(user_file)
@@ -146,3 +146,18 @@ UI基礎功能:
 | created_at   | ISODate   | 圖片上傳時間             |
 
 ## 目錄結構
+```plaintext
+llm_flask/
+├── controllers/           # 控制器層(api)
+├── models/                # 模型層(處理邏輯)
+│   ├── config.py          # 後端配置文件
+├── static/                # 靜態文件
+├── templates/             # 模板文件(展示資料)
+├── .env                   # API KEY環境變量配置
+├── .gitignore             # Git 忽略文件
+├── app.py                 # 應用主文件
+├── docker-compose.yml     # Docker Compose 配置文件
+├── Dockerfile             # Docker 構建文件
+├── LICENSE                # 授權文件
+├── README.md              # 項目說明文件
+└── requirements.txt       # Python 依賴包
