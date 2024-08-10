@@ -167,7 +167,7 @@ llm_flask/
 │   ├── llm_config/        # LLM配置
 │   ├── tools_factory/     # 服務工具類
 │   ├── until/             # 數據庫及加密相關配置
-│   ├── config.py          # 後端配置文件
+│   ├── config.py          # 數據庫及密鑰配置文件
 ├── static/                # 靜態文件
 ├── templates/             # 模板文件(展示資料)
 ├── .env.example           # API KEY環境變量配置
@@ -177,4 +177,9 @@ llm_flask/
 ├── Dockerfile             # Docker 構建文件
 ├── LICENSE                # 授權文件
 ├── README.md              # 項目說明文件
-└── requirements.txt       # Python 依賴包
+├── requirements.txt       # Python 依賴包
+└── routes.py              # 子路由文件
+
+
+
+
