@@ -20,7 +20,7 @@ def login():
             token = request.cookies.get('token')
             verify = verify_token(token)
             if verify["success"]:
-                return redirect(url_for('agent_chat.agent_chat')) #url_for(藍圖名稱.藍圖下函數名稱)：返回函數名稱的路徑 
+                return redirect(url_for('chat.agent_chat')) #url_for(藍圖名稱.藍圖下函數名稱)：返回函數名稱的路徑 
 
             return render_template('login.html')
         

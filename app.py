@@ -1,36 +1,20 @@
 from flask import Flask, request, redirect, url_for, jsonify
-from controllers import auth_bp, chat_bp, modelList_bp, dialogue_bp, user_bp, file_bp
-# from controllers.auth import auth_bp
-# from controllers.chat import chat_bp
-# from controllers.model_list import modelList_bp
-# from controllers.users import user_bp
-# from controllers.dialogue_histroy import dialogue_bp
 import time
 from models.until.jwt_utils import verify_token, refresh_token_expiry
+from routes import register_routes
 
 def cache_bust(url):
     """Filter to append a timestamp to static file URLs to prevent caching."""
     return f"{url}?v={int(time.time())}"
 
 
-
 def create_app():
     app = Flask(__name__, static_folder='static', static_url_path='/static')
 
-    # 注册蓝图
-    app.register_blueprint(auth_bp)
-    app.register_blueprint(chat_bp)
-    app.register_blueprint(modelList_bp)
-    app.register_blueprint(user_bp)
-    app.register_blueprint(dialogue_bp)
-    app.register_blueprint(file_bp)
-
-
-    
     # 添加缓存清除过滤器
     app.jinja_env.filters['cache_bust'] = cache_bust
 
-    # 全局请求前的验证和更新token过期时间
+    # 全局请求前的验证和更新token過期時間
     @app.before_request
     def check_and_refresh_token():
         # 排除不需要验证和更新的endpoint
@@ -50,12 +34,22 @@ def create_app():
                 # 未登錄狀態，直接跳轉到登錄頁面
                 return redirect(url_for('auth.login'))
 
-
-        # 更新 token 过期时间
+    # 响应后刷新token过期时间并更新响应
+    @app.after_request
+    def refresh_token(response):
+        token = request.cookies.get('token')
         if token:
-            refresh_token_expiry(token)
-
-
+            new_token = refresh_token_expiry(token=token,
+                                             token_renewal_threshold_minutes=10, # 10分鐘內過期既刷新token
+                                             extension_hours=1 # 設置新的token過期時間為1小時
+                                             )
+            # 更新响应的cookie                
+            if new_token:
+                response.set_cookie('token', new_token, httponly=True, secure=True)
+        return response
+            
+    # 注冊路由
+    register_routes(app)
     return app
 
 if __name__ == '__main__':

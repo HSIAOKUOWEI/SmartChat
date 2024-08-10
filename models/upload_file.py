@@ -1,4 +1,3 @@
-import pymongo
 import gridfs
 from datetime import datetime, timezone
 import bson
