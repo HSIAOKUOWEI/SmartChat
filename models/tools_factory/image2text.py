@@ -10,7 +10,7 @@ import base64
 
 import os
 from dotenv import load_dotenv
-env_path = r"D:\LLM_application\llm_flask\.env" #請改成自己env的路徑
+from ..config import env_path
 load_dotenv(dotenv_path=env_path)
 
 class imagesInput(BaseModel):

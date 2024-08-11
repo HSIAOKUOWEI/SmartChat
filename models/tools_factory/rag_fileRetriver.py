@@ -8,12 +8,14 @@ from bson.objectid import ObjectId
 
 import os
 from dotenv import load_dotenv
-env_path = r"D:\LLM_application\llm_flask\.env" #請改成自己env的路徑
+from ..config import env_path
 load_dotenv(dotenv_path=env_path)
 
 class filesInput(BaseModel):
     query: str = Field(description="What does the user want to do with the file?") # 用戶想要對文件做什麼
     file_ids: str = Field(description="File ids, separated by commas") # 文件id
+
+
 
 
 

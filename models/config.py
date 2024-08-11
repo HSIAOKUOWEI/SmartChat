@@ -13,3 +13,5 @@ redis_ip = "redis"
 redis_port = 6379
 redis_db = 0 # Redis数据库编号
 
+#請改成自己env的路徑
+env_path =r"D:\LLM_application\llm_flask\.env" 
