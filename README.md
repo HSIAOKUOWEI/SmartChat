@@ -59,8 +59,8 @@ UI基礎功能:
 
 1. 下載倉庫：
     ```bash
-    git clone https://github.com/HSIAOKUOWEI/LLM_Ageng_flask.git
-    cd LLM_Ageng_flask
+    git clone https://github.com/HSIAOKUOWEI/SmartChat.git
+    cd SmartChat
     ```
 
 2. 創建並激活虛擬環境：
