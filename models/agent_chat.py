@@ -1,11 +1,3 @@
-import os
-from dotenv import load_dotenv
-env_path =r"D:\LLM_application\llm_flask\.env" #請改成自己env的路徑
-load_dotenv(dotenv_path=env_path)
-google_api_key = os.getenv("GOOGLE_API_KEY")
-openai_api_key = os.getenv("OPENAI_API_KEY")
-groq_api_key = os.getenv("GROQ_API_KEY")
-
 from .llm_config.model_list import get_model
 from .tools_factory.all_tools import tools
 from langchain.agents import AgentExecutor, create_tool_calling_agent
@@ -25,7 +17,7 @@ prompt = ChatPromptTemplate.from_messages(
 )
 
 # llm初始化
-llm = get_model(model_type="Openai", model_name="gpt-4o-mini", api_key=openai_api_key)
+llm = get_model(model_type="Openai")
 
 # agent初始化
 agent = create_tool_calling_agent(llm=llm, tools=tools, prompt=prompt)

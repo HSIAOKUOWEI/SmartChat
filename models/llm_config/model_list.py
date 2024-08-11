@@ -1,4 +1,10 @@
 from collections import OrderedDict
+import os
+from dotenv import load_dotenv
+
+env_path =r"D:\LLM_application\llm_flask\.env" #請改成自己env的路徑
+load_dotenv(dotenv_path=env_path)
+
 # 模型列表
 MODEL_LIST_DETAILS = OrderedDict([
     ("Openai", OrderedDict([
@@ -38,32 +44,32 @@ MODEL_LIST_DETAILS = OrderedDict([
 def get_model(model_type="Openai", model_name=None, api_key=None, temperature=0.7):
     if model_type == "Openai":
         from langchain_openai import ChatOpenAI
-        openai_llm = ChatOpenAI(api_key=api_key, 
-                                model=model_name or "gpt-4o-mini",
-                                temperature=temperature)
+        openai_llm = ChatOpenAI(api_key = api_key or os.getenv("OPENAI_API_KEY"), 
+                                model = model_name or "gpt-4o-mini",
+                                temperature = temperature)
         return openai_llm
     
     elif model_type == "Google":
         from langchain_google_genai import ChatGoogleGenerativeAI
-        google_llm = ChatGoogleGenerativeAI(api_key=api_key,
-                                            model=model_name or "gemini-1.5-pro",
-                                            temperature=temperature)
+        google_llm = ChatGoogleGenerativeAI(api_key = api_key or os.getenv("GOOGLE_API_KEY"),
+                                            model = model_name or "gemini-1.5-pro",
+                                            temperature = temperature)
         return google_llm
     
     elif model_type == "Groq":
         from langchain_groq import ChatGroq
-        groq_llm = ChatGroq(api_key=api_key,
-                            model=model_name or "llama3-8b-8192",
-                            temperature=temperature)
+        groq_llm = ChatGroq(api_key = api_key or os.getenv("GROQ_API_KEY"),
+                            model = model_name or "llama3-8b-8192",
+                            temperature = temperature)
         return groq_llm
     
     elif model_type == "Siliconflow":
         from langchain_openai import ChatOpenAI
         siliconflow_base_url = "https://api.siliconflow.cn/v1"
-        siliconflow_llm = ChatOpenAI(api_key=api_key, 
-                                model=model_name or "Qwen/Qwen2-7B-Instruct",
-                                temperature=temperature,
-                                base_url=siliconflow_base_url)
+        siliconflow_llm = ChatOpenAI(api_key = api_key or os.getenv("SILICONFLOW_API_KEY"), 
+                                model = model_name or "Qwen/Qwen2-7B-Instruct",
+                                temperature = temperature,
+                                base_url = siliconflow_base_url)
         return siliconflow_llm
     
 

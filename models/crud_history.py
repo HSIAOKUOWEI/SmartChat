@@ -81,7 +81,7 @@ class Dialogue:
         dialogues = self.collection.find(
         {"user_id": ObjectId(user_id)},
         {"_id": 1, "title": 1}
-        ).sort("created_at", -1)
+        ).sort("updated_at", -1)
         return [{"id": str(dialogue["_id"]), "title": dialogue["title"]} for dialogue in dialogues]
 
 # 消息表

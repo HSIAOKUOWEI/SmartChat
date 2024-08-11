@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let countHistory = -10; // 保存每一次的对话记录
 
     let currentDialogueId = ""; // 当前對話框的id，初始為空
-
+    let previousDialogueId = ""; // 用于追踪上一个对话框ID
     window.onload = () => {
         // console.log("Window loaded");
         initializeModelSelection(); // Initialize model selection
@@ -168,10 +168,7 @@ document.addEventListener('DOMContentLoaded', () => {
             .then(response => response.json())
             .then(() => {
                 fetchAndDisplayDialogues();
-                if (currentDialogueId === dialogueId) {
-                    currentDialogueId = null;
-                    chatMessages.innerHTML = '';
-                }
+                createNewDialogue();
             })
             .catch(error => console.error('Error deleting dialogue:', error));
         }
@@ -181,10 +178,15 @@ document.addEventListener('DOMContentLoaded', () => {
         currentDialogueId = dialogueId;
         document.querySelectorAll('.dialogue-item').forEach(el => {
             el.classList.remove('bg-blue-100');
+            if (el.dataset.id === dialogueId) {
+                el.classList.add('bg-blue-100');
+                // 确保选中的对话框可见
+                el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
         });
-        document.querySelector(`.dialogue-item[data-id="${dialogueId}"]`).classList.add('bg-blue-100');
         fetchDialogueMessages(dialogueId);
     }
+
 
     async function fetchDialogueMessages(dialogueId) {
         try {
@@ -213,7 +215,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function createNewDialogue() {
-        currentDialogueId = null;
+        currentDialogueId = "";
         chatMessages.innerHTML = '';
         document.querySelectorAll('.dialogue-item').forEach(el => {
             el.classList.remove('bg-blue-100');
@@ -309,6 +311,9 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
         botMessageDiv.appendChild(spinnerDiv);
 
+        // 保存发送消息前的当前对话框ID
+        const initialDialogueId = currentDialogueId; 
+
         try {
             const response = await fetch('/agent_chat', {
                 method: 'POST',
@@ -331,7 +336,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
+            
+            // 提取对话框ID
             currentDialogueId = response.headers.get('dialogue_id');
+
             const reader = response.body.getReader();
 
             const decoder = new TextDecoder();
@@ -381,7 +389,20 @@ document.addEventListener('DOMContentLoaded', () => {
             // 更新 fullChatHistory
             fullChatHistory.push({ role: 'user', content: message });
             fullChatHistory.push({ role: 'assistant', content: botMessage });
+            
+            // 更新對話框列表，條件為創建新的對話框或者切換了對話框
+            console.log("initalDialogueId:", initialDialogueId);
+            console.log('currentDialogueId:', currentDialogueId);
+            console.log('previousDialogueId:', previousDialogueId);
+            if (initialDialogueId !== currentDialogueId || previousDialogueId !== currentDialogueId) {
+                console.log("success")
+                previousDialogueId = currentDialogueId; // 更新上一个对话框ID
+                await fetchAndDisplayDialogues();
+                selectDialogue(currentDialogueId);
 
+                // 自動滾動到對話框列表的頂部
+                sidebarContent.scrollTop = 0; 
+            }
 
         } catch (error) {
             console.error('Error:', error);
