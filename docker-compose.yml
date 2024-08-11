@@ -4,7 +4,7 @@ version: '3.8'
 services:
   mongodb: #定義一個mongodb的服務
     image: mongo:latest # 拉取指定版本的mongo的image
-    container_name: mongodb # 設定容器名稱
+    container_name: mongodb # 設定容器名稱，這個名稱用於容器之間的網絡通信
     restart: always #配置容器在任何情况下都重新启动，包括容器退出时
     ports:
       - "27017:27017" #主機端口:容器端口
@@ -24,8 +24,8 @@ services:
       - ./redis_db:/data 
 
   flask_app:
-    build: .
-    container_name: flask_app
+    build: . #告訴docker-compose，從當前目錄下找Dockerfile文件構建鏡像
+    container_name: flask_app 
     restart: always
     ports:
       - "5000:5000"
@@ -33,4 +33,4 @@ services:
       - mongodb
       - redis
     volumes:
-      - .:/app #進入到當下的代碼目錄，用點來代替當前路徑就好了，掛在到容器上
+      - .:/app #主机目录:容器目录，進入到當下的代碼目錄，用點來代替當前路徑就好了，掛在到容器上的/app目錄下

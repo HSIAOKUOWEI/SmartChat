@@ -38,9 +38,13 @@ class Dialogue:
         import random
         import uuid
         # 生成標題
+        # llm + 生成標題的prompt + 用戶聊天記錄
+        # 每個對話框是唯一id，所以無需處理重複標題
+
+        # 假裝生成標題
         random_number = random.randint(1, 100)  # 生成1到100之間的隨機數
         unique_id = uuid.uuid4()  # 生成一個唯一的UUID
-        title = f"Generated Title {random_number} - {unique_id}"
+        title = f"Auto_generation_title_test_{random_number}_{unique_id}"
         return title
 
     def create_dialogue(self, user_id, title=""):

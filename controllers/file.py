@@ -1,20 +1,12 @@
 from flask import Blueprint, request, jsonify
 import pymongo
-from models.crud_history import get_user_id # 獲取user_id
 import gridfs
-from datetime import datetime, timezone
-import bson
-from models.upload_file import upload_file_logic, upload_image_logic
+
+from ..models.crud_history import get_user_id # 獲取user_id
+from ..models.upload_file import upload_file_logic, upload_image_logic
 
 
 file_bp = Blueprint('file', __name__)
-
-# MongoDB connection
-client = pymongo.MongoClient("mongodb://localhost:27017/")
-db = client["mydatabase"]
-fs = gridfs.GridFS(db)
-user_image_collection = db["user_image"] # 保存文件
-user_file_collection = db["user_file"] # 保存圖片
 
 @file_bp.route('/file/upload', methods=['POST'])
 def upload_file():

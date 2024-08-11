@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from models.crud_users import validate_credentials, register_user, update_password
+from ..models.crud_users import validate_credentials, register_user, update_password
 
 
 # 创建蓝图

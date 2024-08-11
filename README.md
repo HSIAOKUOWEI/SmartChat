@@ -94,14 +94,9 @@ UI基礎功能:
     mv .env.example .env
     ```
 
-3. 構建Docker鏡像：
+3. 運行Docker：
     ```bash
-    docker build
-    ```
-
-4. 運行Docker容器：
-    ```bash
-    docker-compose up
+    docker-compose up -d
     ```
 
 ## MongoDB表的設計

@@ -1,7 +1,7 @@
 from flask import Flask, request, redirect, url_for, jsonify
 import time
-from models.until.jwt_utils import verify_token, refresh_token_expiry
-from routes import register_routes
+from .models.until.jwt_utils import verify_token, refresh_token_expiry
+from .routes import register_routes
 
 def cache_bust(url):
     """Filter to append a timestamp to static file URLs to prevent caching."""
@@ -45,6 +45,7 @@ def create_app():
                                              )
             # 更新响应的cookie                
             if new_token:
+                print(new_token)
                 response.set_cookie('token', new_token, httponly=True, secure=True)
         return response
             

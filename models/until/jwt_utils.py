@@ -102,8 +102,6 @@ def refresh_token_expiry(token,
             redis_client.set(decoded_result["payload"]["user_id"], new_token, ex=(new_exp - datetime.now(timezone.utc)).seconds)
             
             return new_token # 返回新的JWT令牌
-    else:
-        return decoded_result
     
     # 如果没有触发异常但也没有满足更新条件，则返回None
     return None
