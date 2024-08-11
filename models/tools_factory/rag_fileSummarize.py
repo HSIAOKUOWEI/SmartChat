@@ -2,7 +2,6 @@ from ..until.mongodb_server import get_mongodb_db
 from bson.objectid import ObjectId
 import gridfs
 
-
 import os
 from dotenv import load_dotenv
 from ..config import env_path
@@ -10,8 +9,8 @@ load_dotenv(dotenv_path=env_path)
 
 from langchain_core.tools import StructuredTool,ToolException
 from langchain.pydantic_v1 import BaseModel, Field
+
 from ..llm_config.embedding_list import load_openai_embeddings
-from langchain_openai import ChatOpenAI
 
 class fileInput(BaseModel):
     file_ids: str = Field(description="File ids, separated by commas") # 圖片id
