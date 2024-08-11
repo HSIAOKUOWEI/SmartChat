@@ -24,9 +24,10 @@ SmartChat是一款基於Agent思想構建的開源智能聊天機器人。SmartC
 - 後端：[Flask](https://flask.palletsprojects.com/)
 - 數據庫：[MongoDB](https://www.mongodb.com/)
 - 緩存：[Redis](https://redis.io/)
-- LLM API：[OpenAI](https://openai.com/index/openai-api/)、[Google AI](https://aistudio.google.com/)、[Groq](https://console.groq.com/docs/quickstart)、[Siliconflow](https://siliconflow.cn/)
+- 部署：[Docker](https://www.docker.com/)
 - LLM開發框架：[Langchain](https://www.langchain.com/)
 - 向量數據庫：[Chroma](https://www.trychroma.com/)
+- LLM API：[OpenAI](https://openai.com/index/openai-api/)、[Google AI](https://aistudio.google.com/)、[Groq](https://console.groq.com/docs/quickstart)、[Siliconflow](https://siliconflow.cn/)
 
 ## 功能簡介
 
