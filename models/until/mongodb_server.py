@@ -18,7 +18,7 @@ def get_mongodb_db(username: str = mongo_username,
                    timeout: int = mongo_timeout):
     try:
         # 尝试连接 Docker 容器中的 MongoDB
-        # admin資料庫中，有 admin 帳號和密碼
+        # 一開始用戶默認創建在admin資料庫中，所以需要指定authSource=admin
         client = MongoClient(f'mongodb://{username}:{password}@{ip}:{port}/?authSource=admin',
                              serverSelectionTimeoutMS=timeout)
         # 测试连接
