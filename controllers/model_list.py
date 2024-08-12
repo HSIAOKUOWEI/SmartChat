@@ -9,5 +9,5 @@ def get_model_list():
         {"category": category, "models": [{"name": name, "value": value} for name, value in models.items()]}
         for category, models in MODEL_LIST_DETAILS.items()
     ]
-    
+
     return jsonify(ordered_model_list)

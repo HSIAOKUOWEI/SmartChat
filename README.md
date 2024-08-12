@@ -59,14 +59,14 @@ UI基礎功能:
 
 1. 下載倉庫：
     ```bash
-    git clone https://github.com/HSIAOKUOWEI/SmartChat.git
-    cd SmartChat
+    conda create -n SmartChat python=3.10
+    conda activate SmartChat
     ```
 
 2. 創建並激活虛擬環境：
     ```bash
-    conda create -n SmartChat python=3.10
-    conda activate SmartChat
+    git clone https://github.com/HSIAOKUOWEI/SmartChat.git
+    cd SmartChat
 
 3. 安裝依賴：
     ```bash
@@ -80,14 +80,15 @@ UI基礎功能:
 
 5. 運行項目：
     ```bash
-    python app.py
+    cd ..
+    python -m SmartChat.app
     ```
 
 ### Docker部署
 1. 下載倉庫：
     ```bash
-    git clone https://github.com/HSIAOKUOWEI/LLM_Ageng_flask.git
-    cd LLM_Ageng_flask
+    git clone https://github.com/HSIAOKUOWEI/SmartChat.git
+    cd SmartChat
     ```
 
 2. 配置環境變量：

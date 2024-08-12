@@ -6,9 +6,7 @@ from langchain_community.utilities.dalle_image_generator import DallEAPIWrapper
 from langchain.chains import LLMChain
 from langchain_core.prompts import PromptTemplate
 import os
-from dotenv import load_dotenv
-from ..config import env_path
-load_dotenv(dotenv_path=env_path)
+
 
 class imagesInput(BaseModel):
     # model: Literal["dall-e-3", "dall-e-2"] = Field(default="dall-e-2") # 使用的模型
@@ -28,7 +26,8 @@ def get_image(model, prompt, number, width, height, quality): # , num:int, lengt
     """Generate images based on user descriptions"""
     # """根据用户的描述生成图片"""
     try:
-        return  DallEAPIWrapper(model=model, 
+        return  DallEAPIWrapper(api_key=os.getenv("OPENAI_API_KEY"),
+                                model=model, 
                                 n=number, 
                                 size= f"{width}x{height}", 
                                 quality=quality).run(prompt)

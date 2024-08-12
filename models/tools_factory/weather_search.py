@@ -4,12 +4,9 @@ from langchain.pydantic_v1 import BaseModel, Field
 import requests
 
 import os
-from dotenv import load_dotenv
-from ..config import env_path
-load_dotenv(dotenv_path=env_path)
-
 # 設定天氣API的授權碼
 Authorization=os.getenv("opendataCWA_authorization")
+
 # 指定LLM可以搜尋的城市格式
 taiwan_citys = "宜蘭縣, 花蓮縣, 臺東縣, 澎湖縣, 金門縣, 連江縣, 臺北市, 新北市, 桃園市, 臺中市, 臺南市, 高雄市, 基隆市, 新竹縣, 新竹市, 苗栗縣, 彰化縣, 南投縣, 雲林縣, 嘉義縣, 嘉義市, 屏東縣"
 class WeatherInput(BaseModel):

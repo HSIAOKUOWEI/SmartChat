@@ -1,16 +1,14 @@
 from ..until.mongodb_server import get_mongodb_db
 from bson.objectid import ObjectId
 import gridfs
-
 import os
-from dotenv import load_dotenv
-from ..config import env_path
-load_dotenv(dotenv_path=env_path)
 
 from langchain_core.tools import StructuredTool,ToolException
 from langchain.pydantic_v1 import BaseModel, Field
 
 from ..llm_config.embedding_list import load_openai_embeddings
+from ..llm_config.model_list import get_model
+from langchain.chains.summarize import load_summarize_chain
 
 class fileInput(BaseModel):
     file_ids: str = Field(description="File ids, separated by commas") # 圖片id
@@ -91,23 +89,28 @@ def get_file_summary(file_ids):
     summary_data = {}
 
     for file_id, data in file_data.items():
-        if data["file_type"] == "application/pdf" and data["temp_file_path"]:
-            from langchain_community.document_loaders import PyPDFLoader
-            pdf_path = data["temp_file_path"]
-            try:
-                # 使用文件路径处理文件
-                loader = PyPDFLoader(pdf_path)
+        try:
+            # 處理PDF檔案
+            if data["file_type"] == "application/pdf" and data["temp_file_path"]:
+                from langchain_community.document_loaders import PyPDFLoader
+                path = data["temp_file_path"]
+                loader = PyPDFLoader(path)
                 docs = loader.load()
-                # 处理PDF文档
-            finally:
-                # 删除临时文件
-                os.remove(pdf_path)
+                llm = get_model()
+                chain = load_summarize_chain(llm, chain_type="stuff")
+                result = chain.invoke(docs)
+                summary = result["output_text"]
+                # pages = loader.load_and_split()
+                    
+        finally:
+            # 删除临时文件
+            os.remove(path)
 
 
         # 保存{文件id:{文件名, 文件摘要}}
         summary_data[file_id] = {
             "file_name": data["file_name"],
-            "summary": "summary"
+            "summary": summary
         }
     
     return summary_data
@@ -117,7 +120,7 @@ def _handle_error(error: ToolException) -> str:
     return f"File summary generation failed: `{error.args[0]}`"
 
 
-image_reader = StructuredTool.from_function(
+file_summarize = StructuredTool.from_function(
     func=get_file_summary,
     name="file_summarize",
     args_schema=fileInput,

@@ -1,9 +1,10 @@
-import os
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.backends import default_backend
-from ..config import private_path, public_path
+import os
 
+private_path = os.getenv('private_path')
+public_path = os.getenv('public_path')
 
 def generate_keys(private_key_path, public_key_path):
     # Generate private key
@@ -36,6 +37,7 @@ def generate_keys(private_key_path, public_key_path):
     # Write public key to file
     with open(public_key_path, 'wb') as f:
         f.write(public_key_pem)
+        
 def load_key(key_path):
     if os.path.exists(key_path):
         with open(key_path, 'rb') as f:

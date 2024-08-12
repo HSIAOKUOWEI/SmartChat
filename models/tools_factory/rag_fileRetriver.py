@@ -6,17 +6,14 @@ from ..until.mongodb_server import get_mongodb_db
 from bson.objectid import ObjectId
 
 
-import os
-from dotenv import load_dotenv
-from ..config import env_path
-load_dotenv(dotenv_path=env_path)
+# import os
+# from dotenv import load_dotenv
+# from ..config import env_path
+# load_dotenv(dotenv_path=env_path)
 
 class filesInput(BaseModel):
     query: str = Field(description="What does the user want to do with the file?") # 用戶想要對文件做什麼
     file_ids: str = Field(description="File ids, separated by commas") # 文件id
-
-
-
 
 
 def file_retriver(query, file_ids):

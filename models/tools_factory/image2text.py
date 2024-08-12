@@ -7,11 +7,8 @@ from ..until.mongodb_server import get_mongodb_db
 from bson.objectid import ObjectId
 import gridfs
 import base64
-
 import os
-from dotenv import load_dotenv
-from ..config import env_path
-load_dotenv(dotenv_path=env_path)
+
 
 class imagesInput(BaseModel):
     prompt: str = Field(description="What does the user want to do with the image?") # 用戶想要對圖片做什麼

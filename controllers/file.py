@@ -1,6 +1,4 @@
 from flask import Blueprint, request, jsonify
-import pymongo
-import gridfs
 
 from ..models.crud_history import get_user_id # 獲取user_id
 from ..models.upload_file import upload_file_logic, upload_image_logic

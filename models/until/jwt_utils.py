@@ -1,10 +1,11 @@
-from .generater_keys import get_keys
-from ..config import algorithm
-import jwt
 from datetime import datetime, timedelta, timezone
+from .generater_keys import get_keys
 from .redis_server import get_redis_client
+import jwt
+import os 
 
 redis_client = get_redis_client()
+algorithm = os.getenv('algorithm')
 private_key, public_key = get_keys()
 
 
