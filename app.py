@@ -1,5 +1,4 @@
 import os
-import sys
 from dotenv import load_dotenv
 # 加载 .env 文件
 load_dotenv()
@@ -66,11 +65,8 @@ def create_app():
 if __name__ == '__main__':
     import os
     host = os.getenv('FLASK_HOST', '127.0.0.1')
-    print(host)
     port = int(os.getenv('FLASK_PORT'))
-    print(port)
     debug = os.getenv('FLASK_DEBUG').lower() in ['true', '1', 't', 'yes', 'y']
-    print(debug)
     
     app = create_app()
     app.run(host=host,port=port, debug=debug)
