@@ -161,18 +161,19 @@ UI基礎功能:
 llm_flask/
 ├── controllers/           # 控制器層(api)
 ├── models/                # 模型層(處理邏輯)
-│   ├── llm_config/        # LLM配置
-│   ├── tools_factory/     # 服務工具類
-│   ├── until/             # 數據庫及加密相關配置
-│   ├── config.py          # 數據庫及密鑰配置文件
+│   ├── llm_config/        # LLM EMBEDDING 配置
+│   ├── tools_factory/     # Agent工具類
+│   ├── until/             # 資料庫及加密相關
 ├── static/                # 靜態文件
-├── templates/             # 模板文件(展示資料)
+├── templates/             # 模板文件(前端頁面)
 ├── .env.example           # API KEY環境變量配置
 ├── .gitignore             # Git 忽略文件
-├── app.py                 # 應用主文件
-├── docker-compose.yml     # Docker Compose 配置文件
 ├── Dockerfile             # Docker 構建文件
 ├── LICENSE                # 授權文件
 ├── README.md              # 項目說明文件
+├── __init__.py            
+├── app.py                 # 應用主文件
+├── docker-compose.yml     # Docker Compose 配置文件
+├── envLoad.py             # 加載環境變量
 ├── requirements.txt       # Python 依賴包
 └── routes.py              # 子路由文件
