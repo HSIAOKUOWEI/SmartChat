@@ -158,8 +158,9 @@ UI基礎功能:
 
 ## 目錄結構
 ```plaintext
-llm_flask/
+SmartChat/
 ├── controllers/           # 控制器層(api)
+├── logs/                  # 記錄文件
 ├── models/                # 模型層(處理邏輯)
 │   ├── llm_config/        # LLM EMBEDDING 配置
 │   ├── tools_factory/     # Agent工具類
