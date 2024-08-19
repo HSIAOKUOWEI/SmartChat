@@ -3,3 +3,6 @@ private_key.pem
 public_key.pem
 mongodb_db/
 redis_db/
+milvus_data/
+minio_data/
+etcd_data/
