@@ -80,8 +80,7 @@ UI基礎功能:
 
 5. 運行項目：
     ```bash
-    cd ..
-    python -m SmartChat.app
+    python app.py
     ```
 
 ### Docker部署
