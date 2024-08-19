@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from ..models.crud_history import (
+from models.crud_history import (
     get_user_dialogues, #獲取對話框
     get_dialogue_messages, #獲取對話框內消息
     delete_dialogue_and_messages, # 刪除對話框和對話框的消息

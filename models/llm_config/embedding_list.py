@@ -1,13 +1,8 @@
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.embeddings import HuggingFaceBgeEmbeddings
-from dotenv import load_dotenv
 import os
 
 def load_openai_embeddings(api_key=None, model="text-embedding-ada-002"):
-    # 加载环境变量
-    env_path = r"D:\LLM_application\llm_flask\.env"  # 请改成自己的env文件路径
-    load_dotenv(dotenv_path=env_path)
-    
     return OpenAIEmbeddings(
         api_key= api_key or os.getenv("OPENAI_API_KEY"),
         model=model

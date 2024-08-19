@@ -1,5 +1,5 @@
 from flask import render_template
-from .controllers import auth_bp, chat_bp, modelList_bp, dialogue_bp, user_bp, file_bp
+from controllers import auth_bp, chat_bp, modelList_bp, dialogue_bp, user_bp, file_bp
 def register_routes(app):
     # 注册蓝图
     app.register_blueprint(auth_bp)

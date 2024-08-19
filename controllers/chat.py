@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, request, Response
 
-from ..models.agent_chat import agentChat_response_sync
-from ..models.crud_history import save_message,get_user_id
+from models.agent_chat import agentChat_response_sync
+from models.crud_history import save_message,get_user_id
 import json
 
 chat_bp = Blueprint('chat', __name__)

@@ -22,8 +22,8 @@ SmartChat是一款基於Agent思想構建的開源智能聊天機器人。SmartC
 項目使用的主要技術如下：
 - 前端：[HTML](https://developer.mozilla.org/zh-CN/docs/Web/HTML)、[JavaScript](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript)、[TailwindCSS](https://tailwindcss.com/)
 - 後端：[Flask](https://flask.palletsprojects.com/)
-- 數據庫：[MongoDB](https://www.mongodb.com/)
-- 向量數據庫：[MongoDB](https://www.mongodb.com/)
+- 資料庫：[MongoDB](https://www.mongodb.com/)
+- 向量資料庫：[Milvus](https://milvus.io/)
 - 緩存：[Redis](https://redis.io/)
 - 部署：[Docker](https://www.docker.com/)
 - LLM開發框架：[Langchain](https://www.langchain.com/)
@@ -175,6 +175,5 @@ SmartChat/
 ├── __init__.py            
 ├── app.py                 # 應用主文件
 ├── docker-compose.yml     # Docker Compose 配置文件
-├── envLoad.py             # 加載環境變量
 ├── requirements.txt       # Python 依賴包
 └── routes.py              # 子路由文件

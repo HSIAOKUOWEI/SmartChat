@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 
-from ..models.crud_history import get_user_id # 獲取user_id
-from ..models.upload_file import upload_file_logic, upload_image_logic
+from models.crud_history import get_user_id # 獲取user_id
+from models.upload_file import upload_file_logic, upload_image_logic
 
 
 file_bp = Blueprint('file', __name__)

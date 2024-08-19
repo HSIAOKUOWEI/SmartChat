@@ -6,8 +6,8 @@ load_dotenv()
 from flask import Flask, request, redirect, url_for, jsonify
 import time
 
-from .models.until.jwt_utils import verify_token, refresh_token_expiry
-from .routes import register_routes
+from models.until.jwt_utils import verify_token, refresh_token_expiry
+from routes import register_routes
 
 
 
@@ -70,3 +70,4 @@ if __name__ == '__main__':
     
     app = create_app()
     app.run(host=host,port=port, debug=debug)
+

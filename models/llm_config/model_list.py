@@ -73,3 +73,21 @@ def get_model(model_type="Openai", model_name=None, api_key=None, temperature=0.
         return siliconflow_llm
     
 
+if __name__ == "__main__":
+    import asyncio
+    llm = get_model(api_key="")
+
+    async def main():
+        tasks = []
+        for i in range(10):
+            print(f"Scheduling task {i}")
+            tasks.append(asyncio.to_thread(llm.invoke, "hello"))
+
+        # 并发运行所有任务
+        results = await asyncio.gather(*tasks)
+        
+        # 处理结果
+        for i, result in enumerate(results):
+            print(f"Result of task {i}: {result}")
+
+    asyncio.run(main())

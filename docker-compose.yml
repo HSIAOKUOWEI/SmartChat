@@ -24,13 +24,59 @@ services:
       - ./redis_db:/data 
 
   flask_app:
+    env_file:
+      - .env  # 指定 .env 文件路径
     build: . # 告訴docker-compose，從當前目錄下找Dockerfile文件構建鏡像
     container_name: ${FLASK_NAME}
     restart: always
     ports:
-      - "${FLASK_PORT}:5000"
+      - "${FLASK_PORT}:5000" 
     depends_on:
       - mongodb
       - redis
+      - milvus
     volumes:
       - .:/app # 主机目录:容器目录，進入到當下的代碼目錄，用點來代替當前路徑就好了，掛在到容器上的/app目錄下
+
+
+  milvus:
+    container_name: milvus
+    image: milvusdb/milvus:v2.4.8
+    command: ["milvus", "run", "standalone"]
+    security_opt:
+    - seccomp:unconfined
+    environment:
+      ETCD_ENDPOINTS: etcd:2379
+      MINIO_ADDRESS: minio:9000
+    ports:
+      - "19530:19530" # 主服務port,處理客戶端請求和向量搜尋操作
+    volumes:
+      - ./milvus_data:/var/lib/milvus
+    depends_on:
+      - "etcd"
+      - "minio"
+
+  etcd: # 用於 Milvus 及其他客戶端連接和進行元資料的讀寫操作
+    container_name: milvus-etcd
+    image: quay.io/coreos/etcd:v3.5.5
+    environment:
+      - ETCD_AUTO_COMPACTION_MODE=revision
+      - ETCD_AUTO_COMPACTION_RETENTION=1000
+      - ETCD_QUOTA_BACKEND_BYTES=4294967296
+      - ETCD_SNAPSHOT_COUNT=50000
+    volumes:
+      - ./etcd_data:/etcd
+    command: etcd -advertise-client-urls=http://127.0.0.1:2379 -listen-client-urls http://0.0.0.0:2379 --data-dir /etcd
+  
+  minio:
+    container_name: milvus-minio
+    image: minio/minio:RELEASE.2023-03-20T20-16-18Z
+    environment:
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+    ports:
+      - "9000:9000" #主要服務端口,透過此port上傳和下載文件 
+      - "9001:9001" # Minio 的 Web 控制台管理端口，用于查看和管理存储资源
+    volumes:
+      - ./minio_data:/minio_data
+    command: minio server /minio_data --console-address ":9001"
