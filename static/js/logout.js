@@ -24,7 +24,7 @@ function showModal(title, message) {
 
 function bindModalEvents() {
     document.getElementById('confirmLogout').addEventListener('click', async () => {
-        const response = await fetch('/logout', {
+        const response = await fetch('/auth/logout', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -36,7 +36,7 @@ function bindModalEvents() {
         if (response.ok) {
             // alert('Logout successful');
             document.cookie = 'token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-            window.location.href = '/login';
+            window.location.href = '/auth/login';
         } else {
             alert(`Logout failed: ${result.message}`);
         }

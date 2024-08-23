@@ -6,8 +6,8 @@ load_dotenv()
 from flask import Flask, request, redirect, url_for, jsonify
 import time
 
-from models.until.jwt_utils import verify_token, refresh_token_expiry
-from routes import register_routes
+from models.untils.jwt_utils import verify_token, refresh_token_expiry
+from routes.routes import register_routes
 
 
 
@@ -26,8 +26,8 @@ def create_app():
     # 全局请求前的验证和更新token過期時間
     @app.before_request
     def check_and_refresh_token():
-        # 排除不需要验证和更新的endpoint
-        if request.endpoint in ['auth.login', 'user.register','user.updatePassword', 'static']:
+        # # 排除不需要验证和更新的endpoint
+        if request.endpoint in ['auth.login', 'user.register','user.password', 'static']:
             return
         
         # 从请求中获取 'token' 的 cookie 值

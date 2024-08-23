@@ -54,7 +54,7 @@ $(document).ready(function() {
             }
 
             $.ajax({
-                url: '/register',
+                url: '/users/register',
                 type: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify({

@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SmartChat</title>
     <!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') | cache_bust }}"> -->
-        <script src="https://cdn.tailwindcss.com"></script>
-
+    <script src="https://cdn.tailwindcss.com"></script>
+    {% include 'logo.html' %}
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="{{ url_for('static', filename='js/login.js') | cache_bust }}"></script>
     <script src="{{ url_for('static', filename='js/register.js') | cache_bust }}"></script>

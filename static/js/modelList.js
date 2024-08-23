@@ -1,7 +1,7 @@
 // Function to fetch model list from server
 async function fetchModelList() {
     try {
-        const response = await fetch('/model_list');
+        const response = await fetch('/models/models');
         if (!response.ok) {
             throw new Error('Network response was not ok ' + response.statusText);
         }

@@ -39,8 +39,8 @@
             }
 
             $.ajax({
-                url: '/updatePassword',
-                type: 'POST',
+                url: 'users/password',
+                type: 'PUT',
                 contentType: 'application/json',
                 data: JSON.stringify({
                     username: username,

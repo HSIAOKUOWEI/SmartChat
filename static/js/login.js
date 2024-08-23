@@ -24,7 +24,7 @@ $(document).ready(function() {
     $loginForm.submit(function(e) {
         e.preventDefault();
         $.ajax({
-            url: '/login',
+            url: '/auth/login',
             type: 'POST',
             contentType: 'application/json',
             data: JSON.stringify({
@@ -35,7 +35,7 @@ $(document).ready(function() {
                 if (response.success) {
                     // 存储token到cookie
                     document.cookie = "token=" + response.token + "; path=/";
-                    window.location.href = '/agent_chat';
+                    window.location.href = '/chat/agent_chat';
                 } else {
                     showMessage(response.message);
                 }

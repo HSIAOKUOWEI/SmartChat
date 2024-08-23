@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     async function fetchAndDisplayDialogues() {
         try {
-            const response = await fetch('/get_dialogues');
+            const response = await fetch('/dialogues');
             const dialogues = await response.json();
             // console.log(dialogues)
             displayDialogues(dialogues);
@@ -138,7 +138,7 @@ document.addEventListener('DOMContentLoaded', () => {
         function updateDialogueTitle() {
             const newTitle = input.value.trim();
             if (newTitle && newTitle !== currentTitle) {
-                fetch(`/update_title/${dialogueId}`, {
+                fetch(`/dialogues/${dialogueId}/title`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -162,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function deleteDialogue(dialogueId) {
         if (confirm('Are you sure you want to delete this dialogue?')) {
-            fetch(`/delete_dialogue/${dialogueId}`, {
+            fetch(`/dialogues/${dialogueId}`, {
                 method: 'DELETE',
             })
             .then(response => response.json())
@@ -190,7 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function fetchDialogueMessages(dialogueId) {
         try {
-            const response = await fetch(`/get_messages/${dialogueId}`);
+            const response = await fetch(`/dialogues/${dialogueId}/messages`);
             const messages = await response.json();
             fullChatHistory = messages; // 更新歷史訊息
             displayMessages(messages);
@@ -315,7 +315,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const initialDialogueId = currentDialogueId; 
 
         try {
-            const response = await fetch('/agent_chat', {
+            const response = await fetch('/chat/agent_chat', {
                 method: 'POST',
                 body: formData,
                 headers: {
@@ -837,7 +837,7 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.append('image', image);
 
         try {
-            const response = await fetch('/image/upload', {
+            const response = await fetch('/files/image', {
                 method: 'POST',
                 body: formData,
             });
@@ -860,7 +860,7 @@ document.addEventListener('DOMContentLoaded', () => {
         formData.append('file', file);
 
         try {
-            const response = await fetch('/file/upload', {
+            const response = await fetch('/files/documents', {
                 method: 'POST',
                 body: formData,
             });
@@ -877,54 +877,64 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // 在文件输入更改事件监听器中
     fileInput.addEventListener('change', async () => {
+        const uploadPromises = []; // 用于保存所有上传的 Promise
         for (const file of fileInput.files) {
             uploadedFiles.push(file);
             const previewDiv = createFilePreview(file);
             attachments.appendChild(previewDiv);
-
+    
             // 上传文件或图片并保存 ID 和文件名
             if (file.type.startsWith('image/')) {
-                const imageId = await handleImageUpload(file);
-                if (imageId) {
-                    uploadedFileIds.push({ type: 'image', id: imageId, name: file.name });
-                    console.log('Uploaded image ID:', imageId, 'Name:', file.name);
-                }
+                const uploadImagePromise = handleImageUpload(file).then(imageId => {
+                    if (imageId) {
+                        uploadedFileIds.push({ type: 'image', id: imageId, name: file.name });
+                        console.log('Uploaded image ID:', imageId, 'Name:', file.name);
+                    }
+                });
+                uploadPromises.push(uploadImagePromise);
             } else {
-                const fileId = await handleFileUpload(file);
-                if (fileId) {
-                    uploadedFileIds.push({ type: 'file', id: fileId, name: file.name });
-                    console.log('Uploaded file ID:', fileId, 'Name:', file.name);
-                }
+                const uploadFilePromise = handleFileUpload(file).then(fileId => {
+                    if (fileId) {
+                        uploadedFileIds.push({ type: 'file', id: fileId, name: file.name });
+                        console.log('Uploaded file ID:', fileId, 'Name:', file.name);
+                    }
+                });
+                uploadPromises.push(uploadFilePromise);
             }
         }
+        await Promise.all(uploadPromises); // 并发等待所有上传完成
     });
-
-    // 在粘贴事件监听器中也进行类似的修改
+    
     document.addEventListener('paste', async (e) => {
         if (e.clipboardData && e.clipboardData.files.length) {
+            const uploadPromises = []; // 用于保存所有上传的 Promise
             for (let i = 0; i < e.clipboardData.files.length; i++) {
                 const file = e.clipboardData.files[i];
                 uploadedFiles.push(file);
                 const previewDiv = createFilePreview(file);
                 attachments.appendChild(previewDiv);
-
+    
                 // 上传文件或图片并保存 ID 和文件名
                 if (file.type.startsWith('image/')) {
-                    const imageId = await handleImageUpload(file);
-                    if (imageId) {
-                        uploadedFileIds.push({ type: 'image', id: imageId, name: file.name });
-                        console.log('Uploaded image ID:', imageId, 'Name:', file.name);
-                    }
+                    const uploadImagePromise = handleImageUpload(file).then(imageId => {
+                        if (imageId) {
+                            uploadedFileIds.push({ type: 'image', id: imageId, name: file.name });
+                            console.log('Uploaded image ID:', imageId, 'Name:', file.name);
+                        }
+                    });
+                    uploadPromises.push(uploadImagePromise);
                 } else {
-                    const fileId = await handleFileUpload(file);
-                    if (fileId) {
-                        uploadedFileIds.push({ type: 'file', id: fileId, name: file.name });
-                        console.log('Uploaded file ID:', fileId, 'Name:', file.name);
-                    }
+                    const uploadFilePromise = handleFileUpload(file).then(fileId => {
+                        if (fileId) {
+                            uploadedFileIds.push({ type: 'file', id: fileId, name: file.name });
+                            console.log('Uploaded file ID:', fileId, 'Name:', file.name);
+                        }
+                    });
+                    uploadPromises.push(uploadFilePromise);
                 }
             }
+            await Promise.all(uploadPromises); // 并发等待所有上传完成
         }
     });
 
