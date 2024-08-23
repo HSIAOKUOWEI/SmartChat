@@ -1,4 +1,6 @@
 <h2 style="text-align: center;">SmartChat</h2>
+
+## SmartChat是什麼
 SmartChat是一款基於Agent思想構建的開源智能聊天機器人。SmartChat可以在對話中自動調用各種工具，包括：查詢台灣天氣，網頁問答，圖片問答，圖片生成，檔案問答，搜索引擎問答，查找Arxiv論文，維基百科。
 
 ## 目錄
