@@ -3,10 +3,9 @@
 </p>
 
 <p align="center">
-  <a href="README_EN.md">English</a> | <a href="#简体中文">简体中文</a>
+  <a href="README_EN.md">English</a> | 中文
 </p>
 
-## <a name="简体中文"></a>
 SmartChat是一款基於Agent思想構建的開源智能聊天機器人。SmartChat可以在對話中自動調用各種工具，包括：查詢台灣天氣，網頁問答，圖片問答，圖片生成，檔案問答，搜索引擎問答，查找Arxiv論文，維基百科。
 
 ---
