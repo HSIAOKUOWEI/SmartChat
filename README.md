@@ -158,12 +158,13 @@ UI基礎功能:
 ## 目錄結構
 ```plaintext
 SmartChat/
+├── __pycache__/           # Python 缓存文件夹
 ├── controllers/           # 控制器層(api)
 ├── logs/                  # 記錄文件
 ├── models/                # 模型層(處理邏輯)
-│   ├── llm_config/        # LLM EMBEDDING 配置
-│   ├── tools_factory/     # Agent工具類
-│   ├── until/             # 資料庫及加密相關
+│   ├── database/          # 資料庫連接和操作
+│   └── untils/            # 辅助功能函數
+├── routes/                # 子路由文件夹
 ├── static/                # 靜態文件
 ├── templates/             # 模板文件(前端頁面)
 ├── .env.example           # API KEY環境變量配置
@@ -174,5 +175,5 @@ SmartChat/
 ├── __init__.py            
 ├── app.py                 # 應用主文件
 ├── docker-compose.yml     # Docker Compose 配置文件
-├── requirements.txt       # Python 依賴包
-└── routes.py              # 子路由文件
+├── milvus-standalone-docker-compose.yml # Milvus 官方配置文件
+└── requirements.txt       # Python 依賴包
