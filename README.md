@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="/static/images/logo.png" alt="SmartChat Logo" width="200">
+  <img src="/static/images/logo_font.png" alt="SmartChat Logo" width="200">
 </p>
 
 <p align="center">
