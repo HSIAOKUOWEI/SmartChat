@@ -1,11 +1,11 @@
 from flask import render_template, redirect, url_for
-from controllers import auth, chat, models, dialogue, user, files
+from controllers import auth, chat, models, dialogue, users, files
 def register_routes(app):
     # 註冊藍圖，並設定統一的請求路徑前綴
     app.register_blueprint(auth, url_prefix='/auth')
+    app.register_blueprint(users, url_prefix='/users')
     app.register_blueprint(chat, url_prefix='/chat')
     app.register_blueprint(models, url_prefix='/models')
-    app.register_blueprint(user, url_prefix='/users')
     app.register_blueprint(dialogue, url_prefix='/dialogues')
     app.register_blueprint(files, url_prefix='/files')
 

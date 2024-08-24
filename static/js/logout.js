@@ -33,7 +33,7 @@ function bindModalEvents() {
 
         const result = await response.json();
 
-        if (response.ok) {
+        if (response.ok && result.status === "success") {
             // alert('Logout successful');
             document.cookie = 'token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
             window.location.href = '/auth/login';

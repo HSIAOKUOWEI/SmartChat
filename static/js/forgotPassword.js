@@ -39,7 +39,7 @@
             }
 
             $.ajax({
-                url: 'users/password',
+                url: '/users/password',
                 type: 'PUT',
                 contentType: 'application/json',
                 data: JSON.stringify({
@@ -47,7 +47,8 @@
                     new_password: newPassword
                 }),
                 success: function(response) {
-                    if (response.success) {
+                    console.log(response);
+                    if (response.status === "success") {
                         $('#forgotPasswordModal').addClass('hidden');
                         showResetSuccessModal('Password reset successful! You can now log in with your new password.');
                         clearForgotPasswordForm();
@@ -56,7 +57,7 @@
                     }
                 },
                 error: function(xhr) {
-                    if (xhr.status === 404 && xhr.responseJSON && xhr.responseJSON.error === "Account does not exist") {
+                    if (xhr.status === 404 && xhr.responseJSON && xhr.responseJSON.message === "Account does not exist") {
                         showTemporaryMessage('This account does not exist. Please check your username.', 'error');
                     } else {
                         showTemporaryMessage('Password reset failed. Please try again later.', 'error');

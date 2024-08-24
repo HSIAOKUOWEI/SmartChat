@@ -40,9 +40,13 @@ document.addEventListener('DOMContentLoaded', () => {
     async function fetchAndDisplayDialogues() {
         try {
             const response = await fetch('/dialogues');
-            const dialogues = await response.json();
+            const result = await response.json();
             // console.log(dialogues)
-            displayDialogues(dialogues);
+            if (response.ok && result.status === "success") {
+                displayDialogues(result.data);  // 使用 result.data 来访问对话框数据
+            } else {
+                console.error('Failed to fetch dialogues:', result.message);
+            }
         } catch (error) {
             console.error('Error fetching dialogues:', error);
         }
@@ -139,15 +143,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const newTitle = input.value.trim();
             if (newTitle && newTitle !== currentTitle) {
                 fetch(`/dialogues/${dialogueId}/title`, {
-                    method: 'POST',
+                    method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({ new_title: newTitle }),
                 })
                 .then(response => response.json())
-                .then(() => {
-                    titleSpan.textContent = newTitle;
+                .then(result => {
+                    if (result.status === "success") {
+                        titleSpan.textContent = newTitle;
+                    } else {
+                        console.error('Failed to update dialogue title:', result.message);
+                    }
                     input.replaceWith(titleSpan);
                 })
                 .catch(error => {
@@ -157,22 +165,25 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 input.replaceWith(titleSpan);
             }
-        }
-    }
+        }}
 
-    function deleteDialogue(dialogueId) {
-        if (confirm('Are you sure you want to delete this dialogue?')) {
-            fetch(`/dialogues/${dialogueId}`, {
-                method: 'DELETE',
-            })
-            .then(response => response.json())
-            .then(() => {
-                fetchAndDisplayDialogues();
-                createNewDialogue();
-            })
-            .catch(error => console.error('Error deleting dialogue:', error));
+        function deleteDialogue(dialogueId) {
+            if (confirm('Are you sure you want to delete this dialogue?')) {
+                fetch(`/dialogues/${dialogueId}`, {
+                    method: 'DELETE',
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.status === "success") {
+                        fetchAndDisplayDialogues();
+                        createNewDialogue();
+                    } else {
+                        console.error('Failed to delete dialogue:', result.message);
+                    }
+                })
+                .catch(error => console.error('Error deleting dialogue:', error));
+            }
         }
-    }
 
     function selectDialogue(dialogueId) {
         currentDialogueId = dialogueId;
@@ -191,13 +202,17 @@ document.addEventListener('DOMContentLoaded', () => {
     async function fetchDialogueMessages(dialogueId) {
         try {
             const response = await fetch(`/dialogues/${dialogueId}/messages`);
-            const messages = await response.json();
-            fullChatHistory = messages; // 更新歷史訊息
-            displayMessages(messages);
-        } catch (error) {
-            console.error('Error fetching dialogue messages:', error);
+            const result = await response.json();
+            if (response.ok && result.status === "success") {
+            fullChatHistory = result.data; // 使用 result.data 来访问消息数据
+            displayMessages(result.data);
+        } else {
+            console.error('Failed to fetch dialogue messages:', result.message);
         }
+    } catch (error) {
+        console.error('Error fetching dialogue messages:', error);
     }
+}
 
     function displayMessages(messages) {
         chatMessages.innerHTML = '';
@@ -841,16 +856,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 method: 'POST',
                 body: formData,
             });
-
-            if (!response.ok) {
-                throw new Error('Failed to upload image');
-            }
-
+    
             const data = await response.json();
-            return data.image_id;
+    
+            if (response.ok && data.status === "success") {
+                return data.data.image_id;  // 假设API响应中的data包含image_id
+            } else {
+                throw new Error(data.message || 'Failed to upload image');
+            }
         } catch (error) {
             console.error('Error uploading image:', error);
-            alert('Failed to upload image');
+            alert(error.message || 'Failed to upload image');
         }
     }
 
@@ -864,16 +880,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 method: 'POST',
                 body: formData,
             });
-
-            if (!response.ok) {
-                throw new Error('Failed to upload file');
-            }
-
+    
             const data = await response.json();
-            return data.file_id;
+    
+            if (response.ok && data.status === "success") {
+                return data.data.file_id;  
+            } else {
+                throw new Error(data.message || 'Failed to upload file');
+            }
         } catch (error) {
             console.error('Error uploading file:', error);
-            alert('Failed to upload file');
+            alert(error.message || 'Failed to upload file');
         }
     }
 

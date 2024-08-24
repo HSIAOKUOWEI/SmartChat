@@ -62,7 +62,7 @@ $(document).ready(function() {
                     password: password
                 }),
                 success: function(response) {
-                    if (response.success) {
+                    if (response.status === "success") {
                         $('#registerModal').addClass('hidden');
                         showSuccessModal('Registration successful! You can now log in and use your account.');
                         clearRegisterForm();
@@ -71,7 +71,7 @@ $(document).ready(function() {
                     }
                 },
                 error: function(xhr) {
-                    if (xhr.status === 400 && xhr.responseJSON && xhr.responseJSON.error === "Account already exists") {
+                    if (xhr.status === 400 && xhr.responseJSON && xhr.responseJSON.message === "Account already exists") {
                         showTemporaryMessage('This username already exists. Please choose another username.').removeClass('hidden');
                     } else {
                         showTemporaryMessage('Registration failed, please try again later.').removeClass('hidden');

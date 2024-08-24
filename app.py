@@ -26,8 +26,9 @@ def create_app(app=app):
     # 请求正式處理前的验证和更新token過期時間
     @app.before_request
     async def check_and_refresh_token():
-        # 排除不需要驗證的endpoint
-        if request.endpoint in ['auth.login', 'user.register','user.password', 'static']:
+        print(f"Request path: {request.path}, Endpoint: {request.endpoint}") 
+        # 排除不需要驗證的endpoint：藍圖名稱.路由函數名稱
+        if request.endpoint in ['auth.login', 'users.register','users.password', 'static']:
             return
         
         # 從請求中取得 'token' 
@@ -38,6 +39,7 @@ def create_app(app=app):
         if not verify["success"]:
             # 已登錄狀態，但token過期
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                # print("hello")
                 return jsonify({"redirect": url_for('auth.login')}), 401
             else:
                 # 未登錄狀態，直接跳轉到登錄頁面

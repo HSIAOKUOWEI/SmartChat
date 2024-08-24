@@ -32,7 +32,7 @@ $(document).ready(function() {
                 password: $passwordField.val()
             }),
             success: function(response) {
-                if (response.success) {
+                if (response.status) {
                     // 存储token到cookie
                     document.cookie = "token=" + response.token + "; path=/";
                     window.location.href = '/chat/agent_chat';

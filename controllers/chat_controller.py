@@ -13,7 +13,7 @@ class StreamWithHeaders(Response):
                 self.headers[header] = value
 
 @chat.route('/agent_chat', methods=['GET', 'POST'])
-async def agent_chat():
+def agent_chat():
     if request.method == 'POST':
         # 提取token解析user_id
         token = request.cookies.get('token')

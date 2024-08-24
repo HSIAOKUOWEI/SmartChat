@@ -2,11 +2,13 @@
 async function fetchModelList() {
     try {
         const response = await fetch('/models/models');
-        if (!response.ok) {
-            throw new Error('Network response was not ok ' + response.statusText);
-        }
         const data = await response.json();
-        return data;
+
+        if (data.status === 'success') {
+            return data.data;  // 返回模型列表数据
+        } else {
+            throw new Error(data.message || 'Failed to fetch model list');
+        }
     } catch (error) {
         console.error('Error fetching model list:', error);
         return null;
