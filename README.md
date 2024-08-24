@@ -68,14 +68,15 @@ UI基礎功能:
 
 1. 下載倉庫：
     ```bash
-    conda create -n SmartChat python=3.10
-    conda activate SmartChat
+    git clone https://github.com/HSIAOKUOWEI/SmartChat.git
+    cd SmartChat
     ```
 
 2. 創建並激活虛擬環境：
     ```bash
-    git clone https://github.com/HSIAOKUOWEI/SmartChat.git
-    cd SmartChat
+    conda create -n SmartChat python=3.10
+    conda activate SmartChat
+    ```
 
 3. 安裝依賴：
     ```bash
