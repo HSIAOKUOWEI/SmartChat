@@ -7,10 +7,10 @@ from langchain_community.utilities.tavily_search import TavilySearchAPIWrapper
 import re
 import json
 def format_text_to_list(text):
-    # 定义正则表达式匹配每个列表项
+    # 正則表达式匹配每个列表項
     pattern = r'\[snippet: (.*?), title: (.*?), link: (.*?)\]'
 
-    # 使用正则表达式查找所有匹配项
+    # 使用正則表達式尋找所有符合項
     matches = re.findall(pattern, text)
 
     # 创建结果列表

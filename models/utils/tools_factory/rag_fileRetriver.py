@@ -2,7 +2,7 @@ from langchain_core.tools import StructuredTool,ToolException
 from langchain.pydantic_v1 import BaseModel, Field
 
 from bson.objectid import ObjectId
-from ..rag_common.rewrite_query import rewrite_query
+from ..rag_common.rewrite_query import rewrite
 
 # import os
 
@@ -19,7 +19,7 @@ def file_retriver(query, file_ids):
     file_relevant_content= {}
 
     # 1.判斷query否是要重寫擴寫，返回list of questions
-    questions = rewrite_query(query)
+    questions = rewrite(question=query)
 
     # 2.依據重寫擴寫後的query檢索(向量，BM25，KNN，SVM)向量資料庫
     # 3.rerank排序，然後再去重取前N個

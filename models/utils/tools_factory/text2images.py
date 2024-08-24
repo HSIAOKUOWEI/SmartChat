@@ -1,10 +1,7 @@
 from langchain_core.tools import StructuredTool,ToolException
 from langchain.pydantic_v1 import BaseModel, Field
 from typing import Literal
-from langchain_openai import OpenAI
 from langchain_community.utilities.dalle_image_generator import DallEAPIWrapper
-from langchain.chains import LLMChain
-from langchain_core.prompts import PromptTemplate
 import os
 
 
@@ -23,8 +20,8 @@ class imagesInput(BaseModel):
     
 
 def get_image(model, prompt, number, width, height, quality): # , num:int, length:int
-    """Generate images based on user descriptions"""
-    # """根据用户的描述生成图片"""
+    """used to generate images"""
+    # """用來生成圖片"""
     try:
         return  DallEAPIWrapper(api_key=os.getenv("OPENAI_API_KEY"),
                                 model=model, 

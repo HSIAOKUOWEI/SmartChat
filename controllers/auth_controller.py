@@ -1,22 +1,18 @@
 from flask import Blueprint, jsonify, request, render_template, redirect, url_for
-from models.untils.jwt_utils import generate_token, verify_token, delete_token
+from models.utils.jwt_utils import generate_token, verify_token, delete_token
 from models.users_auth import validate_credentials
 # import logging
-# # 配置日志记录
+# 設定日誌記錄
 # logging.basicConfig(filename='./app.log',level=logging.INFO)
 
 auth = Blueprint('auth', __name__)
 
-# 訪問根目錄直接推送到登錄路由
-@auth.route('/')
-def root():
-    return redirect(url_for('auth.login')) #藍圖名稱.藍圖下函數名稱：返回函數名稱的路徑
 
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
     try:
         if request.method == 'GET':
-            # 检查jwt token是否已存在，如果存在就重定向到使用界面
+            # 檢查jwt token是否已存在，如果存在就重定向到使用介面
             token = request.cookies.get('token')
             verify = verify_token(token)
             if verify["success"]:
@@ -29,12 +25,12 @@ def login():
             username = data.get('username')
             password = data.get('password')
 
-             # 调用验证账号和密码的函数
+             # 驗證帳號和密碼
             validate_response, status_code = validate_credentials(username, password)
 
             # logging.info(f'Validation response: {validate_response}, status_code: {status_code}')
 
-            # 登录成功，生成token
+            # 登入成功，產生token
             if status_code == 200 and validate_response.get("success"):
                 token = generate_token(user_name = username, user_id=validate_response.get("user_id"))
                 # logging.info(f'Token generation response: {token}')

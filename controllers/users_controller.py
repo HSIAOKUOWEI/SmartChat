@@ -5,7 +5,7 @@ from models.users_auth import validate_credentials, register_user, update_passwo
 # 创建蓝图
 user = Blueprint('user', __name__)
 
-# # 验证账号和密码 API
+# # 驗證帳號和密碼 API
 # @user.route('/validate', methods=['POST'])
 # def validate():
 #     data = request.get_json()
@@ -17,7 +17,7 @@ user = Blueprint('user', __name__)
 
 
 
-# 註冊用户 API
+# 用戶注冊
 @user.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
@@ -27,7 +27,7 @@ def register():
     response, status_code = register_user(account, password)
     return jsonify(response), status_code
     
-# 重置密码 API
+# 更新密碼
 @user.route('/password', methods=['PUT'])
 def updatePassword():
     data = request.get_json()

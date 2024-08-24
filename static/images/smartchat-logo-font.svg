@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 100">
+  <rect x="10" y="25" width="280" height="50" fill="black"/>
+  <text x="20" y="65" font-family="Arial, sans-serif" font-weight="bold" font-size="40" fill="white">
+    <tspan>SMART</tspan>
+    <tspan x="160" fill="black" style="paint-order: stroke; stroke: white; stroke-width: 1px;">CHAT</tspan>
+  </text>
+</svg>

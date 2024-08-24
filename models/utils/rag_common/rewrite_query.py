@@ -1,5 +1,5 @@
 
-def is_rewrite_query(question):
+def rewrite(question):
         prompt = f"""
 角色：你是一個智能文本分析助手，專注於精確地解析問題並優化檢索效果。
 任務：對用戶的原始問題進行解析並作出以下判斷：

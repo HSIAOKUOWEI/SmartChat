@@ -8,10 +8,10 @@ from models.dialogue import (
     get_user_id, #獲取user_id
 )
 
-# 创建蓝图
+# 建立藍圖
 dialogue = Blueprint('dialogue', __name__)
 
-# 查询对话框标题和对话框ID API
+# 獲取所有對話框
 @dialogue.route('/', methods=['GET'])
 def get_dialogues():
     try:
@@ -23,7 +23,7 @@ def get_dialogues():
     except Exception as e:
         return jsonify({"error": str(e)}), 400
     
-# 切换对话框 API，根据user_id和对话框id返回相应聊天内容
+# 獲取對話框内容
 @dialogue.route('/<dialogue_id>/messages', methods=['GET'])
 def get_messages(dialogue_id):
     try:
@@ -34,7 +34,7 @@ def get_messages(dialogue_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 400
     
-# 删除对话框及其相关消息 API
+# 刪除對話框和對話框內消息
 @dialogue.route('/<dialogue_id>', methods=['DELETE'])
 def delete_dialogue(dialogue_id):
     try:
@@ -45,7 +45,7 @@ def delete_dialogue(dialogue_id):
     except Exception as e:
         return jsonify({"error": str(e)}), 400
     
-# 更新对话框名称 API
+# 更新對話框標題
 @dialogue.route('/<dialogue_id>/title', methods=['PUT'])
 def update_title(dialogue_id):
     try:

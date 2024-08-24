@@ -13,7 +13,7 @@ class StreamWithHeaders(Response):
                 self.headers[header] = value
 
 @chat.route('/agent_chat', methods=['GET', 'POST'])
-def agent_chat():
+async def agent_chat():
     if request.method == 'POST':
         # 提取token解析user_id
         token = request.cookies.get('token')
@@ -26,15 +26,15 @@ def agent_chat():
         api_key = request.form.get('api_key') # api key
         dialogue_id = request.form.get('dialogue_id') # 當前對話框id
         
-        # 处理上传的文件和图片 ID 以及文件名
-        image_ids = request.form.getlist('image_ids')  # 获取所有 image_ids
-        file_ids = request.form.getlist('file_ids')  # 获取所有 file_ids
+        # 處理上傳的文件和圖片 ID 以及文件名
+        image_ids = request.form.getlist('image_ids')  # 獲取所有 image_ids
+        file_ids = request.form.getlist('file_ids')  # 獲取所有 file_ids
 
-        # 解析每一个 JSON 字符串并格式化为字典
+        
         images = [json.loads(img) for img in image_ids]
         files = [json.loads(file) for file in file_ids]
 
-        # 打印接收到的数据
+        # 列印接收到的數據
         print("Received model_type:", model_type)
         print("Received model_name:", model_name)
         print("Received api_key:", api_key)

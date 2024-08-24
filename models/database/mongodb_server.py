@@ -17,7 +17,7 @@ def get_mongodb_db(username: str = mongo_username,
                    tb_name: str = "",
                    timeout: int = mongo_timeout):
     try:
-        # 尝试连接 Docker 容器中的 MongoDB
+        # 嘗試連接 Docker 容器中的 MongoDB
         # 一開始用戶默認創建在admin資料庫中，所以需要指定authSource=admin
         client = MongoClient(f'mongodb://{username}:{password}@{ip}:{port}/?authSource=admin',
                              serverSelectionTimeoutMS=timeout)
@@ -28,14 +28,14 @@ def get_mongodb_db(username: str = mongo_username,
         # 回退到使用 localhost
         client = MongoClient(f'mongodb://{username}:{password}@localhost:{port}/?authSource=admin',
                              serverSelectionTimeoutMS=timeout)
-        # 测试连接
+        # 測試連接
         client.admin.command('ping')
     
-    # 没指定表，就返回数据库
+    # 沒指定表，就回傳資料庫
     db = client[db_name]
     if not tb_name:
         return db
-    # 指定表，就返回集合
+    # 指定表，就回傳表
     else:
         table = db[tb_name]
         return table

@@ -12,7 +12,7 @@ class urlInput(BaseModel):
 def get_url_content(url: str) -> str: # , num:int, length:int
     """Use this tool to get the clear content of a URL."""
 
-    # 提取url文本中的网页链接部分。url文本可能是一句话
+    # 提取url文本中的網頁連結部分。 url文字可能是一句話
     url_pattern = r'http[s]?://[a-zA-Z0-9./?&=_%#-]+'
     match = re.search(url_pattern, url)
     url = match.group(0) if match else None

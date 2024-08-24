@@ -66,16 +66,10 @@ Always prioritize the user's current query and only utilize the chat history, fi
     return prompt
 
 
-async def agentChat_response_sync(userid, dialogueid, history, message, files, images):
-    prompt = agent_prompt(chat_history = history,   # 聊天記錄
-                                   user_message = message,   # 當前消息
-                                   uploaded_files = files,   # 上傳文件
-                                   uploaded_images = images, # 上傳的圖片
-                                   prompt_language="ZH" #EN  # prompt版本
-                                   ) 
+async def agentChat_response(input, userid, dialogueid):
     response = "" #用來保存輸出結果 
     try:
-        async for event in agent_executor.astream_events({"input": prompt}, version="v1"):
+        async for event in agent_executor.astream_events({"input": input}, version="v1"):
             # 加"\n"是因為yield不能保證每一次都是返回一條數據，
             # 所以用"\n"來區別每一次的數據
             if event["event"] == "on_chat_model_stream":
@@ -111,23 +105,23 @@ async def agentChat_response_sync(userid, dialogueid, history, message, files, i
         save_message(user_id=userid, dialogue_id=dialogueid, message_content=bot_message_content)
     
 
-# async def agentChat_response_sync(userid, dialogueid, history, message, files, images):
-#     prompt = agent_prompt(chat_history = history,   # 聊天記錄
-#                                    user_message = message,   # 當前消息
-#                                    uploaded_files = files,   # 上傳文件
-#                                    uploaded_images = images, # 上傳的圖片
-#                                    prompt_language="ZH" #EN  # prompt版本
-#                                    ) 
+async def agentChat_response_sync(userid, dialogueid, history, message, files, images):
+    prompt = agent_prompt(chat_history = history,   # 聊天記錄
+                                   user_message = message,   # 當前消息
+                                   uploaded_files = files,   # 上傳文件
+                                   uploaded_images = images, # 上傳的圖片
+                                   prompt_language="ZH" #EN  # prompt版本
+                                   ) 
     
-#     # async for response in agentChat_response(input=prompt, userid=userid, dialogueid=dialogueid):
-#     #     yield response
-#     async_gen = agentChat_response(input=prompt, userid=userid, dialogueid=dialogueid)
-#     loop = asyncio.new_event_loop()
-#     asyncio.set_event_loop(loop)
-#     try:
-#         while True:
-#             yield loop.run_until_complete(async_gen.__anext__())
-#     except StopAsyncIteration:
-#         pass
-#     finally:
-#         loop.close()
+    # async for response in agentChat_response(input=prompt, userid=userid, dialogueid=dialogueid):
+    #     yield response
+    async_gen = agentChat_response(input=prompt, userid=userid, dialogueid=dialogueid)
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    try:
+        while True:
+            yield loop.run_until_complete(async_gen.__anext__())
+    except StopAsyncIteration:
+        pass
+    finally:
+        loop.close()

@@ -15,7 +15,7 @@ class fileInput(BaseModel):
 
 def get_file_summary(file_ids):
     """Used to generate summaries or overviews of files uploaded by users, including extracting key information and creating concise summaries"""
-    # """用来生成用户上传文件的摘要或概述，包括提取关键信息和创建简短总结"""
+    # """用來產生使用者上傳文件的摘要或概述，包括提取關鍵資訊和建立簡短總結"""
     
     # return: 字典，包含檔案ID、檔案名丶類型、內容(臨時檔案的路徑)
     file_data = get_source_file(file_ids)

@@ -17,10 +17,10 @@ class imagesInput(BaseModel):
 
 def get_base64_image_from_mongodb(image_ids):
     """
-    从GridFS中获取图片及其类型，并转换为base64编码。
+        從GridFS中取得圖片及其類型，並轉換為base64編碼。
 
-    :param image_ids: 逗号分隔的图片ID列表
-    :return: 包含base64编码的图片和图片类型的字典列表
+        :param image_ids: 逗號分隔的圖片ID列表
+        :return: 包含base64編碼的圖片和圖片類型的字典列表
     """
     # 設置mongodb連接
     db = get_mongodb_db()

@@ -53,7 +53,7 @@ def get_source_file(file_ids):
                 source_files[file_id] = {
                     "file_name": file_name,
                     "file_type": file_type,
-                    "temp_file_path": temp_file_path  # 返回临时文件路径
+                    "temp_file_path": temp_file_path  # 暫存檔案路徑
                 }
             else:
                 source_files[file_id] = {

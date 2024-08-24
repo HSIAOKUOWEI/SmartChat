@@ -1,4 +1,4 @@
-from flask import render_template
+from flask import render_template, redirect, url_for
 from controllers import auth, chat, models, dialogue, user, files
 def register_routes(app):
     # 註冊藍圖，並設定統一的請求路徑前綴
@@ -9,7 +9,13 @@ def register_routes(app):
     app.register_blueprint(dialogue, url_prefix='/dialogues')
     app.register_blueprint(files, url_prefix='/files')
 
-    # 其他全局的路由或错误处理程序也可以放在这里
+    
+    # 根路由，重導向到登錄頁面
+    @app.route('/')
+    async def root():
+        return redirect(url_for('auth.login')) # 藍圖.路由函數名稱
+    
+    # 其他全域的路由或錯誤處理程序也可以放在這裡
     @app.errorhandler(404)
-    def page_not_found(e):
+    async def page_not_found(e):
         return render_template('404.html'), 404

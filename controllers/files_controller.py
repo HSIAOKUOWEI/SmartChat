@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 
 from models.dialogue import get_user_id # 獲取user_id
 from models.files import upload_file_logic, upload_image_logic
-from models.untils.rag_common.make_embedding_vectordb import embedding_document
+from models.utils.rag_common.make_embedding_vectordb import embedding_document
 import asyncio
 
 
@@ -25,7 +25,8 @@ async def upload_file():
 
         file_content = file.read()
         file_name = file.filename
-        # 並行運行多個任務
+
+        # 并行執行兩個函數，生成embedding並保存原始文件和embedding
         save_file_task = asyncio.to_thread(upload_file_logic, user_id, file) #將同步包裝成異步
         embedding_file_task = embedding_document(file_name, file_content, user_id) #異步函數
 

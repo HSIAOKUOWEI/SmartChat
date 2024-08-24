@@ -1,6 +1,6 @@
 from .database.mongodb_server import get_mongodb_db
 from datetime import datetime, timezone
-from .untils.jwt_utils import decode_jwt
+from .utils.jwt_utils import decode_jwt
 from bson import ObjectId
 
 

@@ -15,8 +15,8 @@ class WeatherInput(BaseModel):
     
 
 def get_weather_data(city: str) -> str:
-    """Get the weather for all cities in Taiwan"""
-    # """可以獲取台灣所有城市的天氣"""
+    """Get weather information for Taiwan cities"""
+    # """獲取台灣城市的天氣資訊"""
 
     # 天氣API
     url = f"https://opendata.cwa.gov.tw/api/v1/rest/datastore/F-C0032-001?Authorization={Authorization}&locationName={city}&elementName="

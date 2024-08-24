@@ -2,7 +2,7 @@ import redis
 import os
 redis_ip = os.getenv('REDIS_IP')
 redis_port = int(os.getenv('REDIS_PORT'))
-redis_timeout = int(os.getenv('REDIS_TIMEOUT', 5000))  # 连接超时，单位为毫秒
+redis_timeout = int(os.getenv('REDIS_TIMEOUT', 5000))  # 連接超時，單位為毫秒
 
 def get_redis_client(ip: str = redis_ip, port: int = redis_port, timeout: int = redis_timeout):
     try:
