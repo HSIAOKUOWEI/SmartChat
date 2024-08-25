@@ -6,5 +6,5 @@
   English | <a href="README.md">中文</a>
 </p>
 
-SmartChat is an intelligent chatbot platform based on the concept of Agent-based thinking. It can automatically invoke relevant tools according to the content of the conversation, including querying Taiwan's weather, web Q&A, image Q&A, image generation, file Q&A, search engine Q&A, finding Arxiv papers, and Wikipedia. Through the integration of these tools, SmartChat can intelligently handle a wide range of user needs.
+SmartChat is an intelligent chatbot based on the concept of agent-driven architecture. It utilizes large language models to understand conversation content and automatically invokes relevant tools to perform various tasks, including querying Taiwan's weather, web Q&A, image Q&A, image generation, file processing, search engine Q&A, finding Arxiv papers, and Wikipedia queries. Through the automated integration of these tools, SmartChat provides precise responses to users, fulfilling diverse needs from information retrieval to content generation, thereby solving a wide range of problems intelligently and efficiently.
 
