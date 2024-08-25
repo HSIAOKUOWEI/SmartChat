@@ -27,7 +27,18 @@ def file_retriver(query, file_ids):
     # 5.根據原始相關文件，生成相關原始文件摘要
     # 6.return : {文件id:{文件名:""，原始問題:""，檢索相關結果摘要:""}, }
     for question in questions:
-        for file_id in file_ids:
+        for file_id in file_ids.split(","):
+
+            # 先從mongodb user_file中獲取user_id
+
+            # Milvus使用user_id和file_id過濾匹配
+
+            # 取出ducoment中所有page_content重排序，返回前N個
+
+            # 依據前N個ducoments中的file_id和page_number取出關聯的原始圖片
+
+            # 輸入：documents的原始圖片和原始用戶問題
+
             # 函數一：input:(question,file_id) output:relevant_content
             break
 

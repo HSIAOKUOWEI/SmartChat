@@ -14,10 +14,13 @@ app = Flask(__name__, static_folder='static', static_url_path='/static')
 # 添加緩存清除過濾器
 app.jinja_env.filters['cache_bust'] = lambda url: f"{url}?v={int(time.time())}"
 
-# 請求前驗證和更新 token 過期時間
+# 註冊所有路由
+register_routes(app)
+
+# 請求前，驗證和更新 token 過期時間
 @app.before_request
 async def check_and_refresh_token():
-    print(f"Request path: {request.path}, Endpoint: {request.endpoint}") 
+    # print(f"Request path: {request.path}, Endpoint: {request.endpoint}") 
     if request.endpoint in ['auth.login', 'users.register', 'users.password', 'static']:
         return
 
@@ -28,7 +31,7 @@ async def check_and_refresh_token():
             return jsonify({"redirect": url_for('auth.login')}), 401
         return redirect(url_for('auth.login'))
 
-# 請求後刷新 token
+# 請求後，檢查token是否符合條件，是則刷新 token
 @app.after_request
 def refresh_token(response):
     token = request.cookies.get('token')
@@ -38,8 +41,7 @@ def refresh_token(response):
             response.set_cookie('token', new_token, httponly=True, secure=True)
     return response
 
-# 註冊所有路由
-register_routes(app)
+
 
 if __name__ == '__main__':
     app.run(host=os.getenv('FLASK_HOST', '127.0.0.1'), 
