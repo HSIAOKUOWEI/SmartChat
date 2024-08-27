@@ -6,6 +6,8 @@ from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain_community.utilities.tavily_search import TavilySearchAPIWrapper
 import re
 import json
+import os
+
 def format_text_to_list(text):
     # 正則表达式匹配每个列表項
     pattern = r'\[snippet: (.*?), title: (.*?), link: (.*?)\]'
@@ -43,20 +45,20 @@ def duckduck_search(query: str) -> str:
     return format_text_to_list(search.run(query))
 
 def bing_search(query: str):
-    search = BingSearchResults(api_wrapper=BingSearchAPIWrapper(key="<KEY>"))
+    search = BingSearchResults(api_wrapper=BingSearchAPIWrapper(key=os.getenv("BING_SEARCH_API_KEY")))
 
     return search.run(query)
 
 def tavily_search(query: str):
-    api_wrapper = TavilySearchAPIWrapper(tavily_api_key="<KEY>")
+    api_wrapper = TavilySearchAPIWrapper(tavily_api_key=os.getenv("TAVILY_API_KEY"))
     search = TavilySearchResults(api_wrapper=api_wrapper)
 
     return search.run(query)
 
 # 設置默認錯誤訊息
 internet_search = StructuredTool.from_function(
-    func=duckduck_search, # 函數
-    name="search_duckduck", # 工具名稱
+    func=tavily_search, # 函數
+    name="search_tavily", # 工具名稱
     description="Use this tool to use search engine to search the internet and get information.", #什么時候調用這個工具
     args_schema=SearchInput, # 工具的輸入
     # return_direct=True, #直接返回結果

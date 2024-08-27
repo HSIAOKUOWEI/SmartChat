@@ -23,14 +23,16 @@ async def upload_file():
         if not file:
             return ApiResponse.error(message="No file uploaded", status_code=400)
 
-        file_content = file.read()
-        file_name = file.filename
-
+        # 在讀取檔案內容後，將檔案指標重設為檔案開頭
+        # file.seek(0)
+        
         # 并行執行兩個函數，生成embedding並保存原始文件和embedding
-        save_file_task = asyncio.to_thread(upload_file_logic, user_id, file) #將同步包裝成異步
-        embedding_file_task = embedding_document(file_name, file_content, user_id) #異步函數
+        # save_file_task = asyncio.to_thread(upload_file_logic, user_id, file) #將同步包裝成異步
+        file_id = upload_file_logic(user_id, file)
 
-        file_id, _ = await asyncio.gather(save_file_task, embedding_file_task)
+        # embedding_file_task = embedding_document(file,user_id) #異步函數
+
+        # file_id = await asyncio.gather(save_file_task, embedding_file_task) # 
         return ApiResponse.success(data={"file_id": file_id}, status_code=201)
 
     except Exception as e:

@@ -2,6 +2,8 @@
 from langchain_core.tools import StructuredTool,ToolException
 from langchain.pydantic_v1 import BaseModel, Field
 from langchain.chains.summarize import load_summarize_chain
+from langchain_community.document_loaders.blob_loaders import Blob
+from langchain_community.document_loaders.parsers.pdf import PyPDFParser
 
 from ...model_list import get_model
 from ..rag_common.get_source_file import get_source_file
@@ -19,27 +21,29 @@ def get_file_summary(file_ids):
     
     # return: 字典，包含檔案ID、檔案名丶類型、內容(臨時檔案的路徑)
     file_data = get_source_file(file_ids)
-
+    # 使用PyPDFLoader解析PDF文件
+    parser = PyPDFParser()
+    # langchain Document的列表
+    # print(documents)
+    print(file_data)
     # 初始化返回结果
     summary_data = {}
 
     for file_id, data in file_data.items():
         try:
             # 處理PDF檔案
-            if data["file_type"] == "application/pdf" and data["temp_file_path"]:
+            if data["file_type"] == "application/pdf" and data["documents_stream"]:
                 from langchain_community.document_loaders import PyPDFLoader
-                path = data["temp_file_path"]
-                loader = PyPDFLoader(path)
-                docs = loader.load()
                 llm = get_model()
+                documents = parser.parse(data["documents_stream"])
                 chain = load_summarize_chain(llm, chain_type="stuff")
-                result = chain.invoke(docs)
+                result = chain.invoke(documents)
                 summary = result["output_text"]
-                # pages = loader.load_and_split()
                     
         finally:
             # 删除临时文件
-            os.remove(path)
+            # os.remove(path)
+            pass
 
 
         # 保存{文件id:{文件名, 文件摘要}}

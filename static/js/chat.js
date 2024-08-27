@@ -195,6 +195,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             }
         });
+        fullChatHistory = []; // 清空历史记录
         fetchDialogueMessages(dialogueId);
     }
 
@@ -235,6 +236,7 @@ document.addEventListener('DOMContentLoaded', () => {
         document.querySelectorAll('.dialogue-item').forEach(el => {
             el.classList.remove('bg-blue-100');
         });
+        fullChatHistory = []; // 清空历史记录
     }
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Function to adjust textarea height
@@ -342,7 +344,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.status === 401) {
                 const responseData = await response.json();
                 if (responseData.redirect) {
-                    console.log(responseData.redirect)
+                    // console.log(responseData.redirect)
                     window.location.href = responseData.redirect;
                     return;  // 停止后续代码执行
                 }
@@ -406,11 +408,11 @@ document.addEventListener('DOMContentLoaded', () => {
             fullChatHistory.push({ role: 'assistant', content: botMessage });
             
             // 更新對話框列表，條件為創建新的對話框或者切換了對話框
-            console.log("initalDialogueId:", initialDialogueId);
-            console.log('currentDialogueId:', currentDialogueId);
-            console.log('previousDialogueId:', previousDialogueId);
+            // console.log("initalDialogueId:", initialDialogueId);
+            // console.log('currentDialogueId:', currentDialogueId);
+            // console.log('previousDialogueId:', previousDialogueId);
             if (initialDialogueId !== currentDialogueId || previousDialogueId !== currentDialogueId) {
-                console.log("success")
+                // console.log("success")
                 previousDialogueId = currentDialogueId; // 更新上一个对话框ID
                 await fetchAndDisplayDialogues();
                 selectDialogue(currentDialogueId);
@@ -760,15 +762,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Function to copy message to clipboard
     function copyToClipboard(text, button) {
-        navigator.clipboard.writeText(text).then(() => {
-            const originalContent = button.innerHTML;
-            button.textContent = 'Copied';
-            setTimeout(() => {
-                button.innerHTML = originalContent;
-            }, 2000);
-        }).catch(err => {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        
+        // 使textarea不可见，防止页面出现闪烁
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-9999px';
+        
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        try {
+            const successful = document.execCommand('copy');
+            if (successful) {
+                const originalContent = button.innerHTML;
+                button.textContent = 'Copied';
+                setTimeout(() => {
+                    button.innerHTML = originalContent;
+                }, 2000);
+            } else {
+                console.error('Failed to copy text');
+            }
+        } catch (err) {
             console.error('Failed to copy: ', err);
-        });
+        }
+        
+        document.body.removeChild(textArea);
     }
 
     // Function to retry a message

@@ -4,6 +4,7 @@ from langchain.pydantic_v1 import BaseModel, Field
 from bson.objectid import ObjectId
 from ..rag_common.rewrite_query import rewrite
 
+
 # import os
 
 

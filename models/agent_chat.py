@@ -82,7 +82,7 @@ async def agentChat_response(input, userid, dialogueid):
                                         "content": content
                                     })+ "\n"
             elif event["event"] == "on_tool_start":
-                # print(event)
+                print(event)
                 yield json.dumps({
                                     "event": "on_tool_start",
                                     "name": event["name"],

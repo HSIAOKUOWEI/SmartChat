@@ -7,7 +7,9 @@ import time
 
 
 
-async def embedding_document(file_name, file_content, user_id):
+async def embedding_document(file,user_id):
+    file_content = file.read()
+    file_name = file.filename
     try:
         # start =time.time()
 
