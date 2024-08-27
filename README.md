@@ -24,7 +24,7 @@ SmartChat是一款基於Langchain框架開發的Agent與RAG應用。主要利用
   - [消息表(messages)](#消息表(messages))
   - [儲存文件表(user_file)](#儲存文件表(user_file))
   - [儲存圖片表(user_image)](#儲存圖片表(user_image))
-- [目錄結構](#目錄結構)
+- [代碼目錄結構](#代碼目錄結構)
 
 ## 技術棧
 
@@ -49,7 +49,7 @@ SmartChat是一款基於Langchain框架開發的Agent與RAG應用。主要利用
 
 
 ## 功能展示
- 待錄影
+ [影片](https://github.com/user-attachments/assets/19cc38cf-9a1c-46c6-a4f8-6f1661b9de60)
 
 
 ## 部署
@@ -99,6 +99,32 @@ SmartChat是一款基於Langchain框架開發的Agent與RAG應用。主要利用
     ```bash
     docker-compose up -d
     ```
+
+## 代碼目錄結構
+```plaintext
+SmartChat/
+├── __pycache__/           # Python 缓存文件夹
+├── controllers/           # 控制器層(api)
+├── logs/                  # 記錄文件
+├── models/                # 模型層(處理邏輯)
+│   ├── database/          # 資料庫連接和操作
+│   └── untils/            # 辅助功能函數
+├── routes/                # 子路由文件夹
+├── static/                # 靜態文件
+├── templates/             # 模板文件(前端頁面)
+├── .env.example           # API KEY環境變量配置
+├── .gitignore             # Git 忽略文件
+├── Dockerfile             # Docker 構建文件
+├── LICENSE                # 授權文件
+├── README.md              # 項目說明文件
+├── __init__.py            
+├── app.py                 # 應用主文件
+├── docker-compose.yml     # Docker Compose 配置文件
+├── milvus-standalone-docker-compose.yml # Milvus 官方配置文件
+└── requirements.txt       # Python 依賴包
+```
+
+
 
 ## MongoDB表的設計
 
@@ -155,25 +181,4 @@ SmartChat是一款基於Langchain框架開發的Agent與RAG應用。主要利用
 | gridfs_id    | Array     | 關聯到 GridFS 中存儲的圖片的唯一標識符 |
 | created_at   | ISODate   | 圖片上傳時間             |
 
-## 目錄結構
-```plaintext
-SmartChat/
-├── __pycache__/           # Python 缓存文件夹
-├── controllers/           # 控制器層(api)
-├── logs/                  # 記錄文件
-├── models/                # 模型層(處理邏輯)
-│   ├── database/          # 資料庫連接和操作
-│   └── untils/            # 辅助功能函數
-├── routes/                # 子路由文件夹
-├── static/                # 靜態文件
-├── templates/             # 模板文件(前端頁面)
-├── .env.example           # API KEY環境變量配置
-├── .gitignore             # Git 忽略文件
-├── Dockerfile             # Docker 構建文件
-├── LICENSE                # 授權文件
-├── README.md              # 項目說明文件
-├── __init__.py            
-├── app.py                 # 應用主文件
-├── docker-compose.yml     # Docker Compose 配置文件
-├── milvus-standalone-docker-compose.yml # Milvus 官方配置文件
-└── requirements.txt       # Python 依賴包
+
