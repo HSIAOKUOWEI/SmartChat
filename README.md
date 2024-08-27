@@ -49,15 +49,8 @@ SmartChat是一款基於Langchain框架開發的Agent與RAG應用。主要利用
 
 
 ## 功能展示
-**對話功能**  
 
-<video width="640" height="360" controls autoplay>
-  <source src="https://github.com/user-attachments/assets/19cc38cf-9a1c-46c6-a4f8-6f1661b9de60" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
- 
- <!-- **用戶管理功能** 
- **對話框功能**  -->
+ [影片](https://github.com/user-attachments/assets/19cc38cf-9a1c-46c6-a4f8-6f1661b9de60)
 
 
 ## 部署
