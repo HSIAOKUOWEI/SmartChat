@@ -18,13 +18,14 @@ SmartChat是一款基於Langchain框架開發的Agent與RAG應用。主要利用
 - [部署](#部署)
   - [本地部署](#本地部署)
   - [Docker部署](#Docker部署)
+- [代碼目錄結構](#代碼目錄結構)
 - [MongoDB表的設計](#MongoDB表的設計)
   - [用戶表(users)](#用戶表(users))
   - [對話框表(dialogues)](#對話框表(dialogues))
   - [消息表(messages)](#消息表(messages))
   - [儲存文件表(user_file)](#儲存文件表(user_file))
   - [儲存圖片表(user_image)](#儲存圖片表(user_image))
-- [代碼目錄結構](#代碼目錄結構)
+
 
 ## 技術棧
 
